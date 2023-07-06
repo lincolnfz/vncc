@@ -6,14 +6,17 @@
 #include "base/threadpool.h"
 #include "json.hpp"
 #include <curl/curl.h>
+#include <QObject>
+#include<QMetaType>
 
 
 std::string BuildJsWebData(const long UserID, const char* AccessToken, const char* pszData);
 std::string BuildJsSignContent(const long UserID, const char* AccessToken, const char* pszData);
 std::string BuildPostContent(const char* pszData);
 
-class eWebRequest : public virtual nbase::SupportWeakCallback, public boost::serialization::singleton<eWebRequest>
+class eWebRequest : public QObject, public virtual nbase::SupportWeakCallback, public boost::serialization::singleton<eWebRequest>
 {
+Q_OBJECT
 public:
     
     typedef std::function<void(float, void*)> PROCESS_CALLBACK;
@@ -71,9 +74,16 @@ public:
     typedef std::function<void(std::wstring, std::wstring)> MD5_CALLBACK;
 
 public:
-	eWebRequest();
+    explicit eWebRequest(QObject *parent = nullptr);
 	virtual ~eWebRequest();
 
+signals:
+    void webResponse_Signal(std::shared_ptr<eWebRequest::eWebExchangeData>);
+
+private slots:
+    void webResponse_handler(std::shared_ptr<eWebRequest::eWebExchangeData>);
+
+public:
     void UpdatePregress(std::weak_ptr<nbase::WeakFlag>, PROCESS_CALLBACK, float, void*);
 	bool Init();
     void Help_HTTP_POST(const char* url, nlohmann::json& json, void* user_arg, std::weak_ptr<nbase::WeakFlag> weakflag, WEB_CALLBACK reply);
@@ -286,6 +296,8 @@ private:
     long long _web_timer_ts = 0;
     
 };
+
+Q_DECLARE_METATYPE(std::shared_ptr<eWebRequest::eWebExchangeData>);
 
 // 使用typedef以及宏来简化使用
 typedef boost::serialization::singleton<eWebRequest> singleton_webRequest; // 使用模板的方式只允许单个实例

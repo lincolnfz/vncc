@@ -13,6 +13,14 @@
 #include <netinet/in.h>
 #include <unistd.h>
 #include <sys/timeb.h>
+//#include <qwindow.h>
+
+bool IsWindow(uint64_t id){
+    //QWindow* win = QWindow::fromWinId(id);
+    //return win != nullptr;
+    return true;
+}
+
 //#include "elog.h"
 
 /*bool testTcpPortUsed(unsigned short usPort) {

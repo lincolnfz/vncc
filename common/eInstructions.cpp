@@ -388,7 +388,7 @@ namespace nlohmann {
 
     void from_json(const json& j, PATCH_RESULT_ITEM& s) {
         OPTIONJSVALUE(MobileDeviceID);
-        OPTIONJSVALUE(Status);
+        OPTIONJSVALUE(PStatus);
         OPTIONJSVALUE(DeviceOrderID);
     }
 

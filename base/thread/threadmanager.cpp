@@ -66,7 +66,6 @@ bool ThreadManager::PostRepeatedTask(int identifier, const StdClosure& task,
 
 void ThreadManager::insertThd(int identifier, std::shared_ptr<Thread> sp){
     _threads.insert(std::make_pair(identifier, sp));
-    sp->StartWithLoop();
 }
 
 std::shared_ptr<Thread> ThreadManager::findThd(int identifier){

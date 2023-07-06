@@ -1,56 +1,43 @@
 #include "playdialog.h"
-#include <QPaintEngine>
-#include <myangle/GLES3/gl32.h>
-#include <myangle/GLES2/gl2ext.h>
-#include <myangle/GLES3/gl3platform.h>
-
-#include <myangle/EGL/egl.h>
-#include <myangle/EGL/eglext.h>
-#include <myangle/EGL/eglext_angle.h>
-#include <myangle/EGL/eglplatform.h>
-
-int angle_back[] = {
-    0,
-    EGL_PLATFORM_ANGLE_TYPE_OPENGL_ANGLE,
-};
-EGLDisplay GetDisplay(int idx, void* hdc) {
-    EGLDisplay disp = nullptr;
-    int engtype = angle_back[idx];
-    if (engtype == 0) {
-        disp = eglGetDisplay((EGLNativeDisplayType)hdc);
-    }
-    else {
-        /*EGLint displayAttribs[] = {EGL_PLATFORM_ANGLE_TYPE_ANGLE,
-                               EGL_PLATFORM_ANGLE_TYPE_D3D9_ANGLE,
-                               EGL_NONE };*/
-        std::vector<EGLint> displayAttribs;
-        displayAttribs.push_back(EGL_PLATFORM_ANGLE_TYPE_ANGLE);
-        displayAttribs.push_back(engtype);
-        displayAttribs.push_back(EGL_NONE);
-
-        auto eglGetPlatformDisplayEXT = reinterpret_cast<PFNEGLGETPLATFORMDISPLAYEXTPROC>(
-            eglGetProcAddress("eglGetPlatformDisplayEXT"));
-        if (eglGetPlatformDisplayEXT) {
-            disp = eglGetPlatformDisplayEXT(EGL_PLATFORM_ANGLE_ANGLE,
-                reinterpret_cast<void*>(hdc),
-                &(displayAttribs[0]));
-        }
-    }
-
-    return disp;
-}
-
+#include "common/defThread.h"
 
 PlayDialog::PlayDialog(QWidget *parent, Qt::WindowFlags f) : QDialog(parent, f) {
-    QPaintEngine* paintEngine = this->paintEngine();
-    GetDisplay(0, (void*)paintEngine);
+    //connect(this, &PlayDialog::heightChanged , this, &PlayDialog::handle_heightChange);
+    this->winId();
 }
 
 PlayDialog::~PlayDialog(){
 
 }
 
+void PlayDialog::handle_heightChange(int arg){
+    this->isWindow();
+}
 
-void PlayDialog::open(){
+void PlayDialog::resizeEvent(QResizeEvent * resize_ev){
+    const QSize rc = resize_ev->size();
+    if(_video_render == nullptr){
+        void * p = nullptr;
+        int s = sizeof(p);
+        _video_render = eVideoRender::Create((void *)winId(), rc.width(), rc.height(), 0.f);
+        nbase::StdClosure fn = nbase::Bind(&PlayDialog::testgl, this);
+        nbase::ThreadManager::PostDelayedTask((int)ThreadId::kThreadGL, fn, nbase::TimeDelta::FromSeconds(1));
+    }
+}
 
+void PlayDialog::testgl() {
+    FILE* yuvfile;
+    yuvfile = fopen("/home/lin/1280x720.yuv", "rb");
+    if (yuvfile != 0) {
+        fseek(yuvfile, 0, SEEK_END);
+        long flen = ftell(yuvfile);
+        fseek(yuvfile, 0, SEEK_SET);
+        unsigned char* szbuf = new unsigned char[flen];
+        fread(szbuf, 1, flen, yuvfile);
+        //_gl_render->OnFrame(szbuf, flen, 1280, 720);
+        std::vector<unsigned char> yuvdata(szbuf, szbuf+flen);
+        _video_render->filldata(yuvdata, flen, 1280, 720, eVideoRender::PIXEL_FORMAT::RENDER_YUV420P);
+        delete[] szbuf;
+        fclose(yuvfile);
+    }
 }

@@ -13,6 +13,8 @@
 #include "eWebRequest.h"
 #include "common/eInstructions.h"
 #include "common/defThread.h"
+#include <qwindow.h>
+
 
 
 MainWindow::MainWindow(QWidget *parent)
@@ -20,7 +22,8 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow)
 {
     _misc_thd = std::make_shared<MiscThrad>();
-    nbase::ThreadManager::RegisterThread((int)ThreadId::kThreadUI, _misc_thd);
+    nbase::ThreadManager::RegisterThread((int)ThreadId::kThreadGL, _misc_thd);
+    _misc_thd->Start();
 
     ui->setupUi(this);
     GenerateRpcLayout();
@@ -58,9 +61,10 @@ void MainWindow::GenerateRpcLayout(){
 
 void MainWindow::on_btn_conn_clicked()
 {
+    test_widget();
     {
         std::string str_user, str_pwd;
-        str_user = "13600000005";
+        str_user = "13600000003";
         str_pwd = "a12345678";
         sWebReq.RHLogin(str_user.c_str(), str_pwd.c_str(),
                 nullptr, this->GetWeakFlag(),
@@ -68,7 +72,7 @@ void MainWindow::on_btn_conn_clicked()
                     if (sp->isSucc()) {
                         _RHLOGINRET rhlogin;
                         QuickGetJsonData(sp->_data.c_str(), rhlogin);
-                        int i = 0;
+
                     }
                     else {
                         nbase::StdClosure fn = nbase::Bind(&MainWindow::test_callback, this, "bad", 0);
@@ -80,7 +84,7 @@ void MainWindow::on_btn_conn_clicked()
     {
         //test code
         nbase::StdClosure fn = ToWeakCallback(nbase::Bind([=]()->void{
-            test_widget();
+            //test_widget();
         }));
         fn.t_();
         return;

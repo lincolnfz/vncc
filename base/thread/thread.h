@@ -8,6 +8,7 @@
 #include <chrono>
 #include "base/callback/callback.h"
 #include "base/misctool.h"
+#include "base/event/pevents.h"
 
 namespace nbase {
 
@@ -96,8 +97,10 @@ class Thread
 {
 public:
     friend ThreadManager;
-    Thread();
-    virtual ~Thread();
+    Thread(){
+
+    }
+    virtual ~Thread(){};
 
     void RequestStop(){
             _ASSERT(std::this_thread::get_id() == _self_tid);
@@ -116,11 +119,34 @@ public:
     */
     virtual void Cleanup(){};
 
-protected:
     void StartWithLoop(){
+        mutex = PTHREAD_MUTEX_INITIALIZER; /*初始化互斥锁*/
+        cond = PTHREAD_COND_INITIALIZER; //初始化条件变量
+        pthread_t t_pump;
+        pthread_create(&t_pump, nullptr, &Thread::helpPump, this);
+        //pthread_join(t_pump, nullptr);
+        pthread_mutex_lock(&mutex);
+        pthread_cond_wait(&cond,&mutex);/*等待*/
+        pthread_mutex_unlock(&mutex);
+        pthread_mutex_destroy(&mutex);
+        pthread_cond_destroy(&cond);
+
+    };
+
+    void Start(){
         std::thread thd(&Thread::RunMsgPump, this);
         thd.detach();
-    };
+    }
+
+protected:
+    static void* helpPump(void *parm){
+        Thread* self = reinterpret_cast<Thread*>(parm);
+        pthread_mutex_lock(&self->mutex);
+        self->RunMsgPump();
+        pthread_cond_signal(&self->cond);
+        pthread_mutex_unlock(&self->mutex);
+        return 0;
+    }
 
     void SubmitTask(const nbase::StdClosure &task){
         TaskQueue::PendingTask new_task(task);
@@ -198,6 +224,8 @@ private:
     std::thread::id _self_tid; //自已所在的线程id
     bool _done = false;
     int _millisec_timeout = 5;
+    pthread_mutex_t mutex;// = PTHREAD_MUTEX_INITIALIZER; /*初始化互斥锁*/
+    pthread_cond_t cond;// = PTHREAD_COND_INITIALIZER; //初始化条件变量
 };
 
 }

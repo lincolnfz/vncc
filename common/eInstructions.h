@@ -876,7 +876,7 @@ JSONSTRUCT(PATCH_TASK_GUID) {
 
 JSONSTRUCT(PATCH_RESULT_ITEM) {
     long MobileDeviceID = 0;
-    int Status = 0;
+    int PStatus = 0;
     long DeviceOrderID = 0;
 };
 

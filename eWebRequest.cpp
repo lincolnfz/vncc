@@ -107,7 +107,7 @@ std::string GLOBLE_KEY[] = \
 std::string channel_name = "win_main";
 int g_RequestSource = 15;
 int g_deviceType = 9;
-std::string s_domain = "http://app.taoxyun.com/";
+std::string s_domain = "http://apprhos.taoxyun.com/";
 std::string s_notify_domain = "http://notify.cloudecalc.com/";
 char szPackName[] = "win_main";
 std::string GLOBLE_KEY[] = \
@@ -602,8 +602,10 @@ std::string BuildPostContent(const char* pszData) {
 	return strDst;
 }
 
-eWebRequest::eWebRequest():_executor(1){
+eWebRequest::eWebRequest(QObject *parent): QObject(parent), _executor(1){
 	_str_domain = s_domain;
+    qRegisterMetaType<std::shared_ptr<eWebRequest::eWebExchangeData>>("std::shared_ptr<eWebRequest::eWebExchangeData>");
+    connect(this, &eWebRequest::webResponse_Signal, this, &eWebRequest::webResponse_handler);
 }
 
 eWebRequest::~eWebRequest() {
@@ -705,21 +707,29 @@ bool eWebRequest::briage_HttpsPostContent(std::shared_ptr<eWebRequest::eWebExcha
 		//std::shared_ptr<eEmuManagerData> sp_msg(std::make_shared<eEmuManagerData>());
 		//sp_msg->SetWebPackage(sp);
 		//eEmuManager::getInstance()->WriteInQueue_Msg(sp_msg);
-        nbase::StdClosure fn = self->ToWeakCallback(nbase::Bind([](eWebRequest* self, std::shared_ptr<eWebRequest::eWebExchangeData> sp)->void {
+        /*nbase::StdClosure fn = self->ToWeakCallback(nbase::Bind([](eWebRequest* self, std::shared_ptr<eWebRequest::eWebExchangeData> sp)->void {
             if ( !(sp->_weak_flag.expired()) && sp->_cb) {
 				void* arg = sp->_parm;
 				std::function<void(std::shared_ptr<eWebExchangeData>, void*)> cb = sp->_cb;
 				cb(sp, arg);
 			}
-            }, self, sp));
-		
-		if (!weakflag.expired() && !(sp->_weak_flag.expired())) {
+            }, self, sp));*/
+        emit self->webResponse_Signal(sp);
+        /*if (!weakflag.expired() && !(sp->_weak_flag.expired())) {
 			//dummy	
             nbase::ThreadManager::PostTask((int)ThreadId::kThreadUI, fn);
-		}
+        }*/
 	}
 
 	return ret;
+}
+
+void eWebRequest::webResponse_handler(std::shared_ptr<eWebRequest::eWebExchangeData> sp){
+    if ( !(sp->_weak_flag.expired()) && sp->_cb) {
+        void* arg = sp->_parm;
+        std::function<void(std::shared_ptr<eWebExchangeData>, void*)> cb = sp->_cb;
+        cb(sp, arg);
+    }
 }
 
 bool eWebRequest::briage_DownloadFile(std::shared_ptr<eWebExchangeData> sp,

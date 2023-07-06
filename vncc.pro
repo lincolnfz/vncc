@@ -4,14 +4,14 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 CONFIG += c++17
 
-PKGCONFIG += openssl
-
 INCLUDEPATH += $$PWD
 INCLUDEPATH += $$PWD/third_party/rpclib/include
 INCLUDEPATH += $$PWD/third_party/angle/include
 INCLUDEPATH += $$PWD/base/include
 INCLUDEPATH += $$PWD/third_party/openssl/include
 INCLUDEPATH += $$PWD/third_party/curl/include
+INCLUDEPATH += $$PWD/third_party/glm/include
+INCLUDEPATH += $$PWD/third_party/include
 
 LIBS += $$PWD/third_party/curl/lib/libcurl.a
 LIBS += $$PWD/third_party/rpclib/lib/librpc.a
@@ -22,12 +22,15 @@ LIBS += $$PWD/third_party/openssl/lib64/libcrypto.a
 LIBS += -ldl
 LIBS += -lz
 
+DESTDIR = $$PWD/../qilinout
+
 # The following define makes your compiler emit warnings if you use
 # any Qt feature that has been marked deprecated (the exact warnings
 # depend on your compiler). Please consult the documentation of the
 # deprecated API in order to know how to port your code away from it.
 DEFINES += QT_DEPRECATED_WARNINGS
 DEFINES += _MULTIDESK_VER
+DEFINES += WFMO
 
 # You can also make your code fail to compile if it uses deprecated APIs.
 # In order to do so, uncomment the following line.
@@ -42,6 +45,7 @@ SOURCES += \
     base/algorithm/des.cpp \
     base/algorithm/ehash.cpp \
     base/algorithm/hmac_sh1.cpp \
+    base/event/pevents.cpp \
     base/misctool.cpp \
     base/third_party/convert_utf/ConvertUTF.c \
     base/thread/thread.cpp \
@@ -61,6 +65,7 @@ SOURCES += \
     base/uuid/unparse.c \
     base/uuid/uuid_time.c \
     common/eInstructions.cpp \
+    common/evideorender.cpp \
     eWebRequest.cpp \
     main.cpp \
     mainwindow.cpp \
@@ -75,6 +80,7 @@ HEADERS += \
     base/algorithm/ehash.h \
     base/algorithm/hmac_sh1.h \
     base/callback/callback.h \
+    base/event/pevents.h \
     base/misctool.h \
     base/third_party/convert_utf/ConvertUTF.h \
     base/thread/thread.h \
@@ -88,6 +94,7 @@ HEADERS += \
     base/uuid/uuid.h \
     base/uuid/uuidP.h \
     base/uuid/uuidd.h \
+    common/evideorender.h \
     eWebRequest.h \
     mainwindow.h \
     playdialog.h
