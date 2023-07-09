@@ -24,7 +24,6 @@ void ePrivateProto::GenOutProto(const unsigned long reqId, const int cmdType, co
 std::string ePrivateProto::Connect(const char* lang, const char* token, const int deviceLevel, const char* lbh_token) {
 	std::string out;
     std::unique_lock<std::mutex> lock{ _cs };
-    lock.lock();
 	unsigned long reqid = ++_reqid;
     lock.unlock();
 	nlohmann::json root;
@@ -55,7 +54,6 @@ std::string ePrivateProto::Connect(const char* lang, const char* token, const in
 std::string ePrivateProto::SwitchLang(const char* lang, const char* lbh_token) {
 	std::string out;
     std::unique_lock<std::mutex> lock{ _cs };
-    lock.lock();
 	unsigned long reqid = ++_reqid;
     lock.unlock();
 	//nlohmann::json root;
@@ -68,7 +66,6 @@ std::string ePrivateProto::SwitchLang(const char* lang, const char* lbh_token) {
 std::string ePrivateProto::Heartbeat(const char* lbh_token) {
 	std::string out;
     std::unique_lock<std::mutex> lock{ _cs };
-    lock.lock();
 	unsigned long reqid = ++_reqid;
     lock.unlock();
 	GenOutProto(reqid, CMD_ACTION_GP_HEART, "", lbh_token, out);
@@ -113,7 +110,6 @@ std::string ePrivateProto::AppSwitch() {
 std::string ePrivateProto::SetClipBoard(const char* data, const char* lbh_token) {
 	std::string out;
     std::unique_lock<std::mutex> lock{ _cs };
-    lock.lock();
 	unsigned long reqid = ++_reqid;
     lock.unlock();
 	GenOutProto(reqid, CMD_ACTION_SET_CLIP_BOARD, data, lbh_token, out);
@@ -123,7 +119,6 @@ std::string ePrivateProto::SetClipBoard(const char* data, const char* lbh_token)
 std::string ePrivateProto::GetInstallAppInfo(const char* lbh_token) {
 	std::string out;
     std::unique_lock<std::mutex> lock{ _cs };
-    lock.lock();
 	unsigned long reqid = ++_reqid;
     lock.unlock();
 	nlohmann::json root;
@@ -136,7 +131,6 @@ std::string ePrivateProto::GetInstallAppInfo(const char* lbh_token) {
 std::string ePrivateProto::MouseAction(float x, float y, int action) {
 	std::string out;
     std::unique_lock<std::mutex> lock{ _cs };
-    lock.lock();
 	unsigned long reqid = ++_reqid;
     lock.unlock();
 	nlohmann::json root;
@@ -159,7 +153,6 @@ std::string ePrivateProto::RootApps(std::vector<std::string>& changeapps, std::v
 	std::string out;
     //EnterCriticalSection(&_cs);
     std::unique_lock<std::mutex> lock{ _cs };
-    lock.lock();
 	unsigned long reqid = ++_reqid;
     //LeaveCriticalSection(&_cs);
     lock.unlock();
@@ -173,7 +166,6 @@ std::string ePrivateProto::RootApps(std::vector<std::string>& changeapps, std::v
 std::string ePrivateProto::GetDeviceInfo(const char* lbh_token) {
 	std::string out;
     std::unique_lock<std::mutex> lock{ _cs };
-    lock.lock();
 	unsigned long reqid = ++_reqid;
     lock.unlock();
 
@@ -184,7 +176,6 @@ std::string ePrivateProto::GetDeviceInfo(const char* lbh_token) {
 std::string ePrivateProto::ScreenCaptrue(int width, int height, bool bzip, float Resolution, float Definition, bool isSaveAlbum, const char* lbh_token) {
 	std::string out;
     std::unique_lock<std::mutex> lock{ _cs };
-    lock.lock();
 	unsigned long reqid = ++_reqid;
     lock.unlock();
 
@@ -202,7 +193,6 @@ std::string ePrivateProto::ScreenCaptrue(int width, int height, bool bzip, float
 std::string ePrivateProto::GenNormal(const int cmdType, const std::string& data, const char* lbh_token) {
 	std::string out;
     std::unique_lock<std::mutex> lock{ _cs };
-    lock.lock();
 	unsigned long reqid = ++_reqid;
     lock.unlock();
 

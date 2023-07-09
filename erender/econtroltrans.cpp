@@ -6,6 +6,7 @@
 #include "base/algorithm/CMD5Ex.h"
 #include "ePrivateProto.h"
 #include <unistd.h>
+#include <qlogging.h>
 
 bool gDone = false;
 bool g_multi_win_platform = true;
@@ -75,7 +76,7 @@ void eControlTrans::Init() {
         if (eAVClient::s_base) {
             nbase::ThreadManager::PostTask((int)ThreadId::kThreadRemoteControl,
                 nbase::Bind(&eControlTrans::HelpRemoteRun, this));
-            printf("eAVClient::s_base\n");
+            qDebug("eAVClient::s_base\n");
             break;
         }
         else {
@@ -97,7 +98,7 @@ void eControlTrans::DoOp(std::string json) {
 
 void eControlTrans::close_self() {
     gDone = true;
-    printf("close_self\n");
+    qDebug("close_self\n");
     //gTrans->_render->Stop();
     if (gTrans->_cmd_client->Disconnect()) {
         //WaitForSingleObject(gTrans->_hExitEvent, 6000);
@@ -177,7 +178,7 @@ void eControlTrans::SafeSendRemoteMsg(std::string msg) {
         _remote_client->SendData((unsigned char*)(msg.c_str()), msg.size());
     }
     else {
-        printf("remote not connect \n");
+        qDebug("remote not connect \n");
     }
 }
 
@@ -190,7 +191,7 @@ void eControlTrans::SafeSendCmdMsg(std::string msg) {
         _cmd_client->SendData((unsigned char*)(msg.c_str()), msg.size());
     }
     else {
-        printf("remote not connect \n");
+        qDebug("remote not connect \n");
     }
 }
 
@@ -205,7 +206,7 @@ void eControlTrans::RemoteControlRun() {
      strurl = _cmd_url.substr(0, pos);
      strport = _cmd_url.substr(pos + 1);
      port = atoi(strport.c_str());
-     //_cmd_client->Connect(strurl.c_str(), port);
+     _cmd_client->Connect(strurl.c_str(), port);
      /*if (!gDone) {
          gTrans->_status = RemoteStatus::DISCONNECT;
          srand(time(0));
@@ -334,7 +335,7 @@ void eControlTrans::SendClearApps(){
     gTrans->_status = RemoteStatus::CONNECTED;
     nlohmann::json jRoot, jData, jCmdData;
     //com.dkp.windowslauncher com.cloudecalc.launcher3
-    /*jData["command"] = "launcher";
+    jData["command"] = "launcher";
     jData["data"] = "{\"packageName\":\"com.dkp.windowslauncher\",\"type\":\"windows\"}";
     jData["time"] = ltime;
 
@@ -344,8 +345,8 @@ void eControlTrans::SendClearApps(){
     jRoot["time"] = ltime;
     jRoot["token"] = "";
     jRoot["sign"] = getSign(jRoot);
-    std::string msg = jRoot.dump();*/
-
+    std::string msg = jRoot.dump();
+    /*
     jData["packageName"] = "com.dkp.windowslauncher";
     jData["type"] = "windows";
     jData["width"] = 1920;
@@ -353,8 +354,9 @@ void eControlTrans::SendClearApps(){
     //jCmdData["data"] = jData;
     std::string msg = jData.dump();
     std::string out = sProto.GenNormal(130001, msg, g_lbh_token.c_str()); //CMD_ACTION_MULTI_PREPARE = 130001
+    */
     //_remote_client.SendData((unsigned char*)(msg.c_str()), msg.size());
-    SendTcpData("launcher", (unsigned char*)(out.c_str()), out.size(), [=](const char* msg)->void {
+    SendTcpData("launcher", (unsigned char*)(msg.c_str()), msg.size(), [=](const char* msg)->void {
         nbase::ThreadManager::PostTask((int)ThreadId::kThreadRemoteControl,
             nbase::Bind(&eControlTrans::SendSetProp, gTrans, "0"));
         nbase::ThreadManager::PostDelayedTask((int)ThreadId::kThreadRemoteControl,
@@ -368,9 +370,9 @@ void eControlTrans::SendClearApps(){
         }
         );
 
-    /*nbase::ThreadManager::PostDelayedTask((int)ThreadId::kThreadRemoteControl,
+    nbase::ThreadManager::PostDelayedTask((int)ThreadId::kThreadRemoteControl,
         nbase::Bind(&eControlTrans::StartRender, gTrans),
-        nbase::TimeDelta::FromMilliseconds(4000));*/
+        nbase::TimeDelta::FromMilliseconds(4000));
 }
 
 void eControlTrans::SendSetProp(std::string szMode)
@@ -468,8 +470,8 @@ void eControlTrans::QueryDeviceInfo() {
 void eControlTrans::RemoteConnectCB(void* user_arg) {
     gTrans->SendHeart();
     if (g_multi_win_platform) {
-        //nbase::ThreadManager::PostTask((int)ThreadId::kThreadRemoteControl,
-       //     nbase::Bind(&eControlTrans::SendClearApps, gTrans));
+        nbase::ThreadManager::PostTask((int)ThreadId::kThreadRemoteControl,
+            nbase::Bind(&eControlTrans::SendClearApps, gTrans));
     }
     /*nbase::ThreadManager::PostDelayedTask((int)ThreadId::kThreadRemoteControl,
         nbase::Bind(&eControlTrans::SendSetProp, gTrans, "0"),
@@ -526,7 +528,7 @@ void eControlTrans::SendAVData(const char* fn_name, std::vector<unsigned char>& 
         }
     }
     else {
-        printf("Do not SendAVData\n");
+        qDebug("Do not SendAVData\n");
     }
 }
 
@@ -641,13 +643,13 @@ void eControlTrans::SetConnState(short type) {
     nbase::StdClosure fn = ToWeakCallback(nbase::Bind([=](short type)->void {
         if (!gDone) {
             _conn_type |= type;
-            printf("conn state %d, %d\n", _conn_type, type);
+            qDebug("conn state %d, %d\n", _conn_type, type);
             if (_conn_type == FULL_CONN) {
                 SendCollectData("connect_comp", "{}", false);
             }
         }
         else {
-            printf("Do not SetConnState\n");
+            qDebug("Do not SetConnState\n");
         }
         }, type));
     nbase::ThreadManager::PostTask((int)ThreadId::kThreadRemoteControl, fn);
@@ -659,7 +661,7 @@ void eControlTrans::RemoveConnState(short type) {
             _conn_type &= ~type;
         }
         else {
-            printf("Do not RemoveConnState\n");
+            qDebug("Do not RemoveConnState\n");
         }
         }, type));
     nbase::ThreadManager::PostTask((int)ThreadId::kThreadRemoteControl, fn);

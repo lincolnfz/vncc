@@ -12,6 +12,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <qlogging.h>
 
 #ifndef S_ISDIR
 #define S_ISDIR(x) (((x) & S_IFMT) == S_IFDIR)
@@ -53,7 +54,7 @@ int setnonblock(int fd)
 
 
 void eAVClient::signal_cb(evutil_socket_t fd, short event, void* arg) {
-	printf("signal_cb.....\n");
+    qDebug("signal_cb.....\n");
 	event_base_loopexit(eAVClient::s_base, nullptr);
 }
 
@@ -108,7 +109,7 @@ void eAVClient::RunGlobalThread() {
     //printf("RunGlobalThread threadid: %d\n", GetCurrentThreadId());
     neosmart::SetEvent(s_hReadyEvent);
 	err = event_base_dispatch(eAVClient::s_base);
-	printf("RunGlobalThread exit %d !!!!!! \n", err);
+    qDebug("RunGlobalThread exit %d !!!!!! \n", err);
 	evsignal_del(eAVClient::s_signal_int);
 	eAVClient::s_signal_int = nullptr;
     //CloseHandle(s_hReadyEvent);
@@ -168,19 +169,19 @@ void eAVClient::event_cb(struct bufferevent* bev, short events, void* arg) {
 	if (cli == nullptr) {
 		return;
 	}
-	printf("event_cb events:%0x\n", events);
+    qDebug("event_cb events:%0x\n", events);
 	if (events & BEV_EVENT_EOF) {
 		cli->_status = RetmoteStatus::DISCONNECT;
-		printf("Connection closed (eof).\n");
+        qDebug("Connection closed (eof).\n");
 	}
 	else if (events & BEV_EVENT_ERROR) {
 		cli->_status = RetmoteStatus::DISCONNECT;
-		printf("Got an error on the connection IOCP? \n");
+        qDebug("Got an error on the connection IOCP? \n");
 		//return;
 	}
 	else if (events & BEV_EVENT_TIMEOUT) {
 		cli->_status = RetmoteStatus::DISCONNECT;
-		printf("Connection time out.\n");
+        qDebug("Connection time out.\n");
 	}
 	else if (events & BEV_EVENT_CONNECTED)
 	{
@@ -188,7 +189,7 @@ void eAVClient::event_cb(struct bufferevent* bev, short events, void* arg) {
 		if (cli->_connectCb) {
 			cli->_connectCb(cli->_connect_ctx);
 		}
-		printf("CONNECTED ok\n");
+        qDebug("CONNECTED ok\n");
 		return;
 	}
 	else {
@@ -258,7 +259,7 @@ bool eAVClient::Disconnect() {
 
 bool eAVClient::SendData(const unsigned char* data, const int len) {
 	if (_status != RetmoteStatus::CONNECTED) {
-		printf("not connect dont send!! %d\n", _dummyid);
+        qDebug("not connect dont send!! %d\n", _dummyid);
 		return false;
 	}
 	EVENT_CTX* ctx = new EVENT_CTX;
@@ -298,7 +299,7 @@ void eAVClient::do_conn_cb(int fd, short events, void* arg) {
 		ctx->self->Loop_run(ctx->szuri, ctx->port);
 	}
 	else {
-		printf("cliend has connected\n");
+        qDebug("cliend has connected\n");
 	}
 	delete ctx;
 }
@@ -343,7 +344,7 @@ void eAVClient::do_send_cb(int fd, short events, void* arg) {
     std::string strts;// = GetCurrentTimeStamp(1);
 	//long long ts = utime_ms();
 	//printf("send data ts(%lld): %s\n", ts, (char*)(ctx->data+4));
-	printf("send data ts(%s): %s\n", strts.c_str(), (char*)(ctx->data + 4));
+    qDebug("send data ts(%s): %s\n", strts.c_str(), (char*)(ctx->data + 4));
 	delete[] ctx->data;
 	delete ctx;
 }
@@ -376,14 +377,14 @@ void eAVClient::delay_reconn() {
 }
 
 void eAVClient::help_reconn() {
-	printf("help_reconn \n");	
+    qDebug("help_reconn \n");
 	do_real_connect();
 	
 }
 
 void eAVClient::call_error_cb() {
 	if (_errorCb) {
-		printf("call_error_cb %d\n", (long)_error_ctx);
+        qDebug("call_error_cb %d\n", (long)_error_ctx);
 		_errorCb(ERR_CODE::ERROR_CODE_ERROR, _error_ctx);
 	}
 }
@@ -400,7 +401,7 @@ void eAVClient::do_real_connect() {
     setsockopt(fd, IPPROTO_TCP, TCP_NODELAY, (const char*)&on, sizeof(int));
 #endif
 	if (evutil_make_socket_nonblocking(fd) == 0) {
-		printf("sock no block\n");
+        qDebug("sock no block\n");
 	}
 	_bev = bufferevent_socket_new(eAVClient::s_base, fd, BEV_OPT_CLOSE_ON_FREE | BEV_OPT_THREADSAFE);
 	bufferevent_setcb(_bev, read_cb, nullptr, event_cb, (void*)(this->_session_id));
@@ -413,7 +414,7 @@ void eAVClient::do_real_connect() {
 	}
 	else {
 		//connect error
-		printf("reconn fail\n");
+        qDebug("reconn fail\n");
 		bufferevent_free(_bev);
 		_bev = nullptr;
 		delay_reconn();
