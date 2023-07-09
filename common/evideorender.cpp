@@ -176,7 +176,7 @@ std::shared_ptr<eVideoRender> eVideoRender::Create(const void* hwnd, size_t widt
    eVideoRender* gl_renderer = new eVideoRender(width, height, model_ang);
    if (!gl_renderer->Init(hwnd)) {
        delete gl_renderer;
-       fprintf(stderr, "fail init render!\n");
+       fprintf(stderr, "fail init render!!!\n");
        return sp_renderer;
    }
    //unsigned long dw = neosmart::WaitForMultipleEvents( gl_renderer->_hInitEvents, 2, false, neosmart::WAIT_INFINITE);

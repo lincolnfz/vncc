@@ -541,4 +541,8 @@ namespace nlohmann {
         OPTIONJSVALUE(DeviceData);
         OPTIONJSVALUE(WebSocketData);
     }
+
+    void from_json(const json& j, _PLAYER_CMD& s){
+        OPTIONJSVALUE(winid);
+    }
 }

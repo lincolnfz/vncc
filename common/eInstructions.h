@@ -1098,11 +1098,17 @@ JSONSTRUCT(_RHLOGINRET) {
     _WEBSOCKETINFO WebSocketData;
 };
 
+JSONSTRUCT(_PLAYER_CMD) {
+    int winid=0;
+};
+
 bool isSuccResponse(_WEB_RESPONSE_PACK_BASE&);
 
 namespace nlohmann{
     void from_json(const json& j, _WEB_RESPONSE_PACK_BASE& s);
     void from_json(const json& j, _RHLOGINRET& s);
+    void from_json(const json& j, _PLAYER_CMD& s);
+    void from_json(const json& j, BASE_PROTO& s);
 }
 
 class eInstructions

@@ -1,4 +1,6 @@
-#pragma once
+#ifndef defthread_h
+#define defthread_h
+
 enum class ThreadId
 {
 	kThreadUI = 0,
@@ -9,3 +11,5 @@ enum class ThreadId
 	kThreadSend2Main = 5,
         kThreadDecode = 6,
 };
+
+#endif

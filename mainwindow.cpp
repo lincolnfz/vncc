@@ -31,7 +31,13 @@ MainWindow::MainWindow(QWidget *parent)
     nbase::StdClosure fn = ToWeakCallback(nbase::Bind([]()->void{
             qDebug("hello\n");
         }));
-    nbase::ThreadManager::PostRepeatedTask(1, fn, nbase::TimeDelta::FromSeconds(1), -1);
+    //nbase::ThreadManager::PostRepeatedTask(1, fn, nbase::TimeDelta::FromSeconds(1), -1);
+
+    int l, s;
+    nbase::StdClosure fn2 = ToWeakCallback(nbase::Bind([=](int l, int s)->void {
+
+        }, l, s));
+    nbase::ThreadManager::PostTask((int)ThreadId::kThreadRemoteControl, fn2);
 }
 
 MainWindow::~MainWindow()
@@ -61,7 +67,7 @@ void MainWindow::GenerateRpcLayout(){
 
 void MainWindow::on_btn_conn_clicked()
 {
-    test_widget();
+    //test_widget();
     {
         std::string str_user, str_pwd;
         str_user = "13600000003";
@@ -72,6 +78,17 @@ void MainWindow::on_btn_conn_clicked()
                     if (sp->isSucc()) {
                         _RHLOGINRET rhlogin;
                         QuickGetJsonData(sp->_data.c_str(), rhlogin);
+                        char va[128] = {0};
+                        sprintf(va, "%s:%d", rhlogin.DeviceData.LocalIP.c_str(), rhlogin.DeviceData.AVPort);
+                        char remote[128] = {0};
+                        sprintf(remote, "%s:%d", rhlogin.DeviceData.IP.c_str(), rhlogin.DeviceData.AdbPort + 512);
+                        char cmd[128] = {0};
+                        sprintf(cmd, "%s:%d", rhlogin.DeviceData.IP.c_str(), rhlogin.DeviceData.AdbPort + 256);
+                        char ws[128] = {0};
+                        sprintf(ws, "%s:%d", rhlogin.DeviceData.IP.c_str(), rhlogin.DeviceData.WebRTCPort);
+                        char stun[128] = {0};
+                        sprintf(stun, "%s:%d", rhlogin.DeviceData.IP.c_str(), 3478);
+                        qDebug("va:%s,remote:%s,cmd:%s,ws:%s,stun:%s", va, remote, cmd, ws, stun);
 
                     }
                     else {
@@ -89,6 +106,7 @@ void MainWindow::on_btn_conn_clicked()
         fn.t_();
         return;
     }
+    return;
     QString vnc_adds = this->ui->edit_adds->text();
     QString app_path = QCoreApplication::applicationDirPath();
     std::string str_app_path = app_path.toStdString();

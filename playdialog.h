@@ -18,6 +18,7 @@ public Q_SLOTS:
 protected:
     void resizeEvent(QResizeEvent *) override;
     void testgl();
+    void RunPlayer();
 
 private:
     std::shared_ptr<eVideoRender> _video_render;
