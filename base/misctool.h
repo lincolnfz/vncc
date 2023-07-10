@@ -146,3 +146,5 @@ void getNowTimeFmt(std::string& out);
 bool testTcpPortUsed(unsigned short usPort);
 
 bool IsWindow(uint64_t id);
+
+std::string GetExeDirectory();

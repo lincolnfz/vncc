@@ -9,9 +9,12 @@ INCLUDEPATH += $$PWD/../third_party/rpclib/include
 INCLUDEPATH += $$PWD/../third_party/angle/include
 INCLUDEPATH += $$PWD/../base/include
 INCLUDEPATH += $$PWD/../third_party/openssl/include
+INCLUDEPATH += $$PWD/../third_party/ffmpeg/include
 INCLUDEPATH += $$PWD/../third_party/curl/include
 INCLUDEPATH += $$PWD/../third_party/glm/include
 INCLUDEPATH += $$PWD/../third_party/include
+INCLUDEPATH += $$PWD/../third_party/sdl/include
+INCLUDEPATH += $$PWD/../third_party/yjrtc
 
 LIBS += $$PWD/../third_party/rpclib/lib/librpc.a
 LIBS += $$PWD/../third_party/angle/lib/libEGL.so
@@ -20,8 +23,25 @@ LIBS += $$PWD/../third_party/openssl/lib64/libssl.a
 LIBS += $$PWD/../third_party/openssl/lib64/libcrypto.a
 LIBS += $$PWD/../third_party/libevent/lib/libevent.a
 LIBS += $$PWD/../third_party/libevent/lib/libevent_pthreads.a
+#LIBS += $$PWD/../third_party/yjrtc/libyjrtc.so
+LIBS += $$PWD/../third_party/sdl/lib/libSDL2.a
+LIBS += $$PWD/../third_party/ffmpeg/lib/libavcodec.a
+LIBS += $$PWD/../third_party/ffmpeg/lib/libavformat.a
+LIBS += $$PWD/../third_party/ffmpeg/lib/libavutil.a
+LIBS += $$PWD/../third_party/ffmpeg/lib/libavfilter.a
+LIBS += $$PWD/../third_party/ffmpeg/lib/libavdevice.a
+LIBS += $$PWD/../third_party/ffmpeg/lib/libswresample.a
+LIBS += $$PWD/../third_party/ffmpeg/lib/libswscale.a
 LIBS += -ldl
 LIBS += -lz
+
+#pragma comment(lib, "avcodec.lib")
+#pragma comment(lib, "avformat.lib")
+#pragma comment(lib, "avutil.lib")
+#pragma comment(lib, "avdevice.lib")
+#pragma comment(lib, "avfilter.lib")
+#pragma comment(lib, "swresample.lib")
+#pragma comment(lib, "swscale.lib")
 
 DESTDIR = $$PWD/../../qilinout
 
@@ -70,6 +90,7 @@ SOURCES += \
     ../common/eAVClient.cpp \
     ../common/eInstructions.cpp \
     ../common/evideorender.cpp \
+    eAVRender.cpp \
     ePrivateProto.cpp \
     econtroltrans.cpp \
     main.cpp \
@@ -116,6 +137,7 @@ HEADERS += \
     ../common/eAVClient.h \
     ../common/eInstructions.h \
     ../common/evideorender.h \
+    eAVRender.h \
     ePrivateProto.h \
     econtroltrans.h \
     mainwindow.h

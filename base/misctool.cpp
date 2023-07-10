@@ -14,6 +14,8 @@
 #include <unistd.h>
 #include <sys/timeb.h>
 //#include <qwindow.h>
+#include <sys/types.h>
+#include <unistd.h>
 
 bool IsWindow(uint64_t id){
     //QWindow* win = QWindow::fromWinId(id);
@@ -316,4 +318,18 @@ bool testTcpPortUsed(unsigned short usPort) {
     }
 	close(s);
 	return bUsed;
+}
+
+std::string GetExeDirectory(){
+    long pid = getpid();
+    char str[512] = {0};
+    char buf[512] = {0};
+    snprintf(str, sizeof(str), "/proc/%ld/exe", pid);
+    readlink(str, buf, sizeof(str));
+    std::string dir(buf);
+    auto found = dir.rfind('/');
+    if (found != std::string::npos) {
+        dir.erase(found);
+    }
+    return dir;
 }

@@ -5,7 +5,8 @@
  * SPDX-License-Identifier: MIT
  */
 
-#pragma once
+#ifndef pevent_h
+#define pevent_h
 
 #if defined(_WIN32) && !defined(CreateEvent)
 #error Must include Windows.h prior to including pevents.h!
@@ -41,3 +42,5 @@ namespace neosmart {
     int PulseEvent(neosmart_event_t event);
 #endif
 } // namespace neosmart
+
+#endif

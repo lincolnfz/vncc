@@ -1,7 +1,7 @@
 #ifndef ECONTROLTRANS_H
 #define ECONTROLTRANS_H
-#include "common/eAVClient.h"
 #include "base/base.h"
+#include "common/eAVClient.h"
 #include "common/defThread.h"
 
 using RecvCALLBACK = std::function<void(const char*)>;
@@ -13,6 +13,26 @@ using FailCALLBACK = std::function<void(void)>;
 #define FULL_CONN (CMD_CONN|RT_CONN|AV_CONN)
 
 using DATA_PACKAGE = std::vector<unsigned char>;
+class eAVRender;
+
+class RenderHelpThrad : public nbase::Thread {
+public:
+    RenderHelpThrad(){};
+    virtual ~RenderHelpThrad(){};
+
+    virtual void Init() override {
+
+    };
+
+    /**
+    * 虚函数，主线程退出时，做一些清理工作
+    * @return void	无返回值
+    */
+    virtual void Cleanup() override {
+
+    };
+};
+
 
 class eControlTrans : public nbase::SupportWeakCallback, public nbase::Thread
 {
@@ -67,6 +87,7 @@ public:
     void RemoveConnState(short type);
 
     void SendFrameActivate();
+    void SetWindow(uint64_t winid, int w, int h);
 
 protected:
     bool SendTcpData(const char* name, const unsigned char* data, const int len, RecvCALLBACK, FailCALLBACK);
@@ -131,6 +152,8 @@ private:
 private:
     enum ThreadId thread_id_;
     //std::unique_ptr<eAVRender> _render;
+    std::shared_ptr<eAVRender> _render;
+    std::shared_ptr<RenderHelpThrad> _glrenderThd;
     std::string _remote_url, _cmd_url, _av_url, _ws_url, _stun_url, _orderid;
     unsigned short _port = 19055;
     unsigned short _rpc_port = 0;
@@ -153,6 +176,9 @@ private:
     int _remain = 0;
     int _len = 0;
     long long _alive_ts_sec = 0;
+    int64_t _winid = 0;
+    int _gl_w_win = 0;
+    int _gl_h_win = 0;
 };
 
 #endif // ECONTROLTRANS_H

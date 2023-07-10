@@ -7,8 +7,10 @@
 #include "ePrivateProto.h"
 #include <unistd.h>
 #include <qlogging.h>
+#include "eAVRender.h"
 
 bool gDone = false;
+bool g_play_logo_animation = true;
 bool g_multi_win_platform = true;
 std::string g_lbh_token;
 std::string g_acess_token;
@@ -60,13 +62,20 @@ void eControlTrans::Init() {
     _cmd_client->SetConnectCB(eControlTrans::RemoteConnectCB, nullptr);
     _cmd_client->SetRecvCB(eControlTrans::recvRemoteDataCB, nullptr);
     _cmd_client->SetErrorCB(eControlTrans::ErrCB, nullptr);
+    _render = std::make_shared<eAVRender>(ThreadId::kThreadDecode, "decodethd", "15486");
+    nbase::ThreadManager::RegisterThread((int)ThreadId::kThreadDecode, _render);
+
+    _glrenderThd = std::make_shared<RenderHelpThrad>();
+    nbase::ThreadManager::RegisterThread((int)ThreadId::kThreadGL, _glrenderThd);
+    _glrenderThd->Start();
+
     //_render.reset(new eAVRender(ThreadId::kThreadDecode, "render", _orderid.c_str()));
     //_render->set_thread_priority(nbase::ThreadPriority::kThreadPriorityHigh);
-    //_render->setParm(_av_url.c_str(), _ws_url.c_str(), _stun_url.c_str(), _connect_type, _data_type);
+    _render->setParm(_av_url.c_str(), _ws_url.c_str(), _stun_url.c_str(), _connect_type, _data_type);
     if (true/*IsWindow(_glwnd)*/) {
-        //_render->SetExtInfo(_token.c_str(), _guid.c_str(), _glwnd);
+        _render->SetExtInfo(_token.c_str(), _guid.c_str(), (void*)_winid, _gl_w_win, _gl_h_win);
     }
-    if (false) {
+    if (true) {
         //非多端直接连视频
         nbase::ThreadManager::PostTask((int)ThreadId::kThreadRemoteControl,
             nbase::Bind(&eControlTrans::StartRender, gTrans));
@@ -136,13 +145,8 @@ void eControlTrans::Roate(float angle) {
 
 int g_Bitrate = 2000;
 bool g_bAutorate = false;
-void setbitrate(bool bauto, int bitrate){
-
-}
-
-void setfps(int fps){
-
-}
+extern void setbitrate(bool bauto, int bitrate);
+extern void setfps(int fps);
 
 void eControlTrans::Bitrate(int bitrate, int bauto) {
     g_Bitrate = bitrate;
@@ -327,7 +331,7 @@ void eControlTrans::SendHeart() {
 }
 
 void eControlTrans::StartRender() {
-    //_render->Start();
+    _render->Start();
 }
 
 void eControlTrans::SendClearApps(){
@@ -335,7 +339,7 @@ void eControlTrans::SendClearApps(){
     gTrans->_status = RemoteStatus::CONNECTED;
     nlohmann::json jRoot, jData, jCmdData;
     //com.dkp.windowslauncher com.cloudecalc.launcher3
-    jData["command"] = "launcher";
+    /*jData["command"] = "launcher";
     jData["data"] = "{\"packageName\":\"com.dkp.windowslauncher\",\"type\":\"windows\"}";
     jData["time"] = ltime;
 
@@ -345,8 +349,8 @@ void eControlTrans::SendClearApps(){
     jRoot["time"] = ltime;
     jRoot["token"] = "";
     jRoot["sign"] = getSign(jRoot);
-    std::string msg = jRoot.dump();
-    /*
+    std::string msg = jRoot.dump();*/
+
     jData["packageName"] = "com.dkp.windowslauncher";
     jData["type"] = "windows";
     jData["width"] = 1920;
@@ -354,9 +358,9 @@ void eControlTrans::SendClearApps(){
     //jCmdData["data"] = jData;
     std::string msg = jData.dump();
     std::string out = sProto.GenNormal(130001, msg, g_lbh_token.c_str()); //CMD_ACTION_MULTI_PREPARE = 130001
-    */
+
     //_remote_client.SendData((unsigned char*)(msg.c_str()), msg.size());
-    SendTcpData("launcher", (unsigned char*)(msg.c_str()), msg.size(), [=](const char* msg)->void {
+    SendTcpData("launcher", (unsigned char*)(out.c_str()), out.size(), [=](const char* msg)->void {
         nbase::ThreadManager::PostTask((int)ThreadId::kThreadRemoteControl,
             nbase::Bind(&eControlTrans::SendSetProp, gTrans, "0"));
         nbase::ThreadManager::PostDelayedTask((int)ThreadId::kThreadRemoteControl,
@@ -370,8 +374,14 @@ void eControlTrans::SendClearApps(){
         }
         );
 
+    //nbase::ThreadManager::PostDelayedTask((int)ThreadId::kThreadRemoteControl,
+    //    nbase::Bind(&eControlTrans::StartRender, gTrans),
+    //    nbase::TimeDelta::FromMilliseconds(4000));
+    nbase::StdClosure fn = ToWeakCallback(nbase::Bind([=]()->void{
+        _render->triggerStraamThread();
+    }));
     nbase::ThreadManager::PostDelayedTask((int)ThreadId::kThreadRemoteControl,
-        nbase::Bind(&eControlTrans::StartRender, gTrans),
+        fn,
         nbase::TimeDelta::FromMilliseconds(4000));
 }
 
@@ -492,7 +502,7 @@ void eControlTrans::RemoteConnectCB(void* user_arg) {
     //连接视频流的工作与连反控分开执行
     //nbase::ThreadManager::PostTask((int)ThreadId::kThreadRemoteControl,
     //    nbase::Bind(&eControlTrans::StartRender, gTrans));
-    gTrans->SendCollectData(std::string("connect_msg_success"), std::string("{}"), false);
+    //gTrans->SendCollectData(std::string("connect_msg_success"), std::string("{}"), false);
     gTrans->SetConnState(CMD_CONN);
     gTrans->_status = RemoteStatus::CONNECTED;
 }
@@ -620,9 +630,10 @@ void eControlTrans::RouteCmd(const char* szjson) {
     else if (cmdType == CMD_ACTION_PREPARE_CONNECT) {
         //if (g_multi_win_platform && g_play_logo_animation == false) {
             //多端切换桌面根据此条信息
-            nbase::ThreadManager::PostTask((int)ThreadId::kThreadRemoteControl,
-                nbase::Bind(&eControlTrans::StartRender, gTrans));
+            //nbase::ThreadManager::PostTask((int)ThreadId::kThreadRemoteControl,
+            //    nbase::Bind(&eControlTrans::StartRender, gTrans));
         //}
+        int i = 0;
     }
 }
 
@@ -669,6 +680,14 @@ void eControlTrans::RemoveConnState(short type) {
 
 void eControlTrans::SendFrameActivate() {
 
+}
+
+void eControlTrans::SetWindow(uint64_t winid, int w, int h){
+    //_render = std::make_shared<eAVRender>((int)ThreadId::kThreadDecode, "decodethd", "15486");
+    //_render->SetExtInfo("", "", (void*)winid, w, h);
+    _winid = winid;
+    _gl_w_win = w;
+    _gl_h_win = h;
 }
 
 void eControlTrans::HelpPreview() {
