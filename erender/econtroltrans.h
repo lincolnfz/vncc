@@ -89,6 +89,12 @@ public:
     void SendFrameActivate();
     void SetWindow(uint64_t winid, int w, int h);
 
+    void SendMouseMsg(float x, float y, int type);
+    void DoRoate(int w, int h, float angle);
+    void SendTextMsg(std::string& txt);
+    void SendLogEvent(std::string& txt);
+    void RButtonEvent(float x, float y, int mousetype);
+
 protected:
     bool SendTcpData(const char* name, const unsigned char* data, const int len, RecvCALLBACK, FailCALLBACK);
     void RouteCmd(const char* szjson);
@@ -110,7 +116,7 @@ private:
     static void close_self();
     static void TransMouse(std::string strjson);
     static void SendEventMsg(std::string strjson, int type);
-    static void Roate(float angle);
+    static void Roate(int w, int h, float angle);
     static void Bitrate(int bitrate, int bauto);
     static void SetFps(int fps);
     static void Preview(bool);
@@ -119,7 +125,7 @@ private:
     static void GoDebug();
     void SafeSendRemoteMsg(std::string msg);
     void SafeSendCmdMsg(std::string msg);
-    void SaveRoate(float angle);
+    void SaveRoate(int w, int h, float angle);
     void RemoteControlRun();
     void HelpRemoteRun();
     void HelpErrCB();

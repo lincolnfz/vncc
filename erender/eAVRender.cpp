@@ -499,7 +499,7 @@ static void video_decode(AVCodecContext* dec_ctx, AVFrame* frame, AVPacket* pkt)
 	while (ret >= 0) {
 		ret = avcodec_receive_frame(dec_ctx, frame);
 		if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF) {
-			fprintf(stderr, "avcodec_receive_frame err\n");
+            //fprintf(stderr, "avcodec_receive_frame err\n");
 			return;
 		}
 		else if (ret < 0) {
@@ -517,7 +517,7 @@ static void video_decode(AVCodecContext* dec_ctx, AVFrame* frame, AVPacket* pkt)
 		ts = utime_ms() - g_laucnch_TS;
 		//printf("recv frame %d width:%d, height:%d, %lld(ms)  \n", dec_ctx->frame_number, frame->width, frame->height, ts);
 #endif
-        qDebug("render", "recv frame %d w:%d, h:%d", dec_ctx->frame_number, frame->width, frame->height);
+        //qDebug("recv frame %d w:%d, h:%d", dec_ctx->frame_number, frame->width, frame->height);
 		if (!b_ratio_send) {
 			gTrans->UpdateRatio(frame->width, frame->height);
 			b_ratio_send = true;

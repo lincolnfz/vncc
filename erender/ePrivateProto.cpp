@@ -130,9 +130,9 @@ std::string ePrivateProto::GetInstallAppInfo(const char* lbh_token) {
 
 std::string ePrivateProto::MouseAction(float x, float y, int action) {
 	std::string out;
-    std::unique_lock<std::mutex> lock{ _cs };
-	unsigned long reqid = ++_reqid;
-    lock.unlock();
+    //std::unique_lock<std::mutex> lock{ _cs };
+    //unsigned long reqid = ++_reqid;
+    //lock.unlock();
 	nlohmann::json root;
 	root["actionIndex"] = 0;
 	root["action"] = action;

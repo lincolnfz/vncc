@@ -251,7 +251,7 @@ void setCurrentThreadHighPriority(bool value) {
 }
 
 //time_stamp_type - 需要获取的时间戳的级别，0表示秒级时间戳，1表示毫秒级时间戳，2表示微秒级时间戳，3表示纳秒级时间戳
-std::string GetCurrentTimeStamp(int time_stamp_type = 0){
+std::string GetCurrentTimeStamp(int time_stamp_type /*= 0*/){
 	std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
 
 	std::time_t now_time_t = std::chrono::system_clock::to_time_t(now);

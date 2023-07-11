@@ -8,13 +8,14 @@
 #include <unistd.h>
 #include <qlogging.h>
 #include "eAVRender.h"
+#include <base/algorithm/Base64.h>
 
 bool gDone = false;
 bool g_play_logo_animation = true;
 bool g_multi_win_platform = true;
 std::string g_lbh_token;
 std::string g_acess_token;
-int g_modelID = 4;
+int g_modelID = 0;
 
 static bool cmp(const std::string& a, const std::string& b) {
     return a.compare(b) < 0;
@@ -138,9 +139,9 @@ void eControlTrans::SendEventMsg(std::string strjson, int type) {
        nbase::Bind(&eControlTrans::SafeSendCmdMsg, gTrans, msg));
 }
 
-void eControlTrans::Roate(float angle) {
+void eControlTrans::Roate(int w, int h, float angle) {
     nbase::ThreadManager::PostTask((int)ThreadId::kThreadRemoteControl,
-        nbase::Bind(&eControlTrans::SaveRoate, gTrans, angle));
+        nbase::Bind(&eControlTrans::SaveRoate, gTrans, w, h, angle));
 }
 
 int g_Bitrate = 2000;
@@ -173,8 +174,18 @@ void eControlTrans::DoAlive() {
 
 }
 
-void eControlTrans::SaveRoate(float angle) {
+void eControlTrans::DoRoate(int w, int h, float angle) {
+    nbase::ThreadManager::PostTask((int)ThreadId::kThreadRemoteControl,
+        nbase::Bind(&eControlTrans::SaveRoate, this, w, h, angle));
+}
 
+void eControlTrans::SaveRoate(int w, int h, float angle) {
+    nbase::StdClosure fn = ToWeakCallback(nbase::Bind([this](int w, int h, float ang)->void {
+            if (_render && _render->_gl_render) {
+                _render->_gl_render->rotate(w, h, ang);
+            }
+            }, w, h, angle));
+        nbase::ThreadManager::PostTask((int)ThreadId::kThreadGL, fn);
 }
 
 void eControlTrans::SafeSendRemoteMsg(std::string msg) {
@@ -191,7 +202,7 @@ void eControlTrans::SafeSendCmdMsg(std::string msg) {
         /// <summary>
         /// 因为服务器有bug,所以发送数据时都sleep(1ms).输入法发现在问题
         /// </summary>
-        usleep(1);
+        //usleep(1);
         _cmd_client->SendData((unsigned char*)(msg.c_str()), msg.size());
     }
     else {
@@ -457,7 +468,7 @@ void eControlTrans::SendSwitchLang() {
     //std::string msg = sProto.SwitchLang(_lang.c_str()); //jRoot.dump();
 
     std::string msg = sProto.Connect(_lang.c_str(), g_acess_token.c_str(), g_modelID, g_lbh_token.c_str());
-    _cmd_client->SendData((unsigned char*)(msg.c_str()), msg.size());
+    //_cmd_client->SendData((unsigned char*)(msg.c_str()), msg.size());
 }
 
 void eControlTrans::QueryDeviceInfo() {
@@ -633,6 +644,7 @@ void eControlTrans::RouteCmd(const char* szjson) {
             //nbase::ThreadManager::PostTask((int)ThreadId::kThreadRemoteControl,
             //    nbase::Bind(&eControlTrans::StartRender, gTrans));
         //}
+        //_render->triggerStraamThread();
         int i = 0;
     }
 }
@@ -728,4 +740,56 @@ void eControlTrans::CheckAlive() {
 
 void eControlTrans::GoDebug() {
     freopen("CONOUT$", "w", stdout);
+}
+
+void eControlTrans::SendMouseMsg(float x, float y, int mtype){
+    nbase::StdClosure fn = ToWeakCallback(nbase::Bind([=](float x, float y ,  int mtype)->void{
+        std::string strjson = sProto.MouseAction(x, y, mtype);
+        std::string msg = sProto.GenNormal(CMD_ACTION_TOUCH, strjson, "");
+        SafeSendRemoteMsg(msg);
+    }, x, y, mtype));
+    nbase::ThreadManager::PostTask((int)ThreadId::kThreadRemoteControl, fn);
+}
+
+void eControlTrans::SendTextMsg(std::string& txt){
+    nbase::StdClosure fn = ToWeakCallback(nbase::Bind([=](std::string& txt)->void{
+        std::string msg = sProto.GenNormal(CMD_ACTION_IME_INPUT_TEXT, txt, g_lbh_token.c_str());
+        SafeSendCmdMsg(msg);
+    }, txt));
+    nbase::ThreadManager::PostTask((int)ThreadId::kThreadRemoteControl, fn);
+}
+
+void eControlTrans::SendLogEvent(std::string& txt){
+    nbase::StdClosure fn = ToWeakCallback(nbase::Bind([=](std::string& txt)->void{
+        std::string msg = sProto.GenNormal(CMD_ACTION_SHELL, txt, g_lbh_token.c_str());
+        SafeSendCmdMsg(msg);
+    }, txt));
+    nbase::ThreadManager::PostTask((int)ThreadId::kThreadRemoteControl, fn);
+}
+
+void eControlTrans::RButtonEvent(float x, float y, int mousetype) {
+    nlohmann::json jData;
+    nlohmann::json jBoast, item, event_data;
+    item["x"] = x;
+    item["y"] = y;
+    item["mousetype"] = mousetype;
+
+    std::string mouse_data = item.dump().c_str();
+    int nBase64Len = CBase64::Base64Encode(mouse_data.c_str(), mouse_data.size(), nullptr, 0);
+    char* pcsBase64 = (char*)calloc(nBase64Len + 1, sizeof(char));
+    CBase64::Base64Encode(mouse_data.c_str(), mouse_data.size(), (BYTE*)pcsBase64, nBase64Len);
+    mouse_data = pcsBase64;
+    free(pcsBase64);
+
+    event_data["key"] = "event_data";
+    event_data["value"] = mouse_data;
+
+    jBoast["action"] = "android.event.action.MOUSE_EVENT";
+    jBoast["extraInfos"].push_back(event_data);
+    std::string mousemsg = jBoast.dump();
+    nbase::StdClosure fn = ToWeakCallback(nbase::Bind([=](std::string mousemsg)->void{
+        std::string msg = sProto.GenNormal(CMD_ACTION_SEND_BROADCASTRECEIVER, mousemsg, "");
+        SafeSendCmdMsg(msg);
+    }, mousemsg));
+    nbase::ThreadManager::PostTask((int)ThreadId::kThreadRemoteControl, fn);
 }

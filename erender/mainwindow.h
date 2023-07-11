@@ -17,7 +17,7 @@ public:
     MainWindow(QWidget *parent = nullptr);
     virtual ~MainWindow();
     //virtual QVariant inputMethodQuery(Qt::InputMethodQuery) const override;
-    virtual bool eventFilter(QObject *watched, QEvent *event) override;
+    //virtual bool eventFilter(QObject *watched, QEvent *event) override;
 
 protected:
     virtual void resizeEvent(QResizeEvent *) override;
@@ -27,6 +27,15 @@ protected:
     virtual void mouseMoveEvent(QMouseEvent *event) override; //鼠标移动
     virtual void wheelEvent(QWheelEvent *event) override; //鼠标滚轮滚动
     virtual void inputMethodEvent(QInputMethodEvent *) override;
+    virtual void focusInEvent(QFocusEvent *event) override;
+    virtual void focusOutEvent(QFocusEvent *event) override;
+    virtual void keyPressEvent(QKeyEvent *event) override;
+    virtual void keyReleaseEvent(QKeyEvent *event) override;
+
+    void OutMouseMsg(float x, float y, int mtype);
+    void OutTextMsg(QString& txt);
+    void CtrlAccelrate(int keycode);
+    void RButtonEvent(float x, float y, int mtype);
 
 protected:
     std::shared_ptr<eControlTrans> _trans;

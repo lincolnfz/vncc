@@ -141,6 +141,8 @@ std::vector<std::string> stringSplit(const std::string& str, char delim);
  */
 void setCurrentThreadHighPriority(bool value);
 
+std::string GetCurrentTimeStamp(int time_stamp_type = 0);
+
 void getNowTimeFmt(std::string& out);
 
 bool testTcpPortUsed(unsigned short usPort);

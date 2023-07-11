@@ -12,7 +12,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
-#include <qlogging.h>
+#include <QDebug>
 
 #ifndef S_ISDIR
 #define S_ISDIR(x) (((x) & S_IFMT) == S_IFDIR)
@@ -341,7 +341,7 @@ void eAVClient::do_send_cb(int fd, short events, void* arg) {
 		begin += userage;
 		remind -= userage;
 	}
-    std::string strts;// = GetCurrentTimeStamp(1);
+    std::string strts = GetCurrentTimeStamp(1);
 	//long long ts = utime_ms();
 	//printf("send data ts(%lld): %s\n", ts, (char*)(ctx->data+4));
     qDebug("send data ts(%s): %s\n", strts.c_str(), (char*)(ctx->data + 4));
