@@ -91,6 +91,8 @@ SOURCES += \
     ../common/eAVClient.cpp \
     ../common/eInstructions.cpp \
     ../common/evideorender.cpp \
+    ../common/qt/ecolbtn.cpp \
+    ../common/qt/eimagebtn.cpp \
     eAVRender.cpp \
     ePrivateProto.cpp \
     econtroltrans.cpp \
@@ -139,6 +141,8 @@ HEADERS += \
     ../common/eAVClient.h \
     ../common/eInstructions.h \
     ../common/evideorender.h \
+    ../common/qt/ecolbtn.h \
+    ../common/qt/eimagebtn.h \
     eAVRender.h \
     ePrivateProto.h \
     econtroltrans.h \

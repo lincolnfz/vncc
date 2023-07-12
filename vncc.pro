@@ -66,6 +66,8 @@ SOURCES += \
     base/uuid/uuid_time.c \
     common/eInstructions.cpp \
     common/evideorender.cpp \
+    common/qt/ecolbtn.cpp \
+    common/qt/eimagebtn.cpp \
     eWebRequest.cpp \
     main.cpp \
     mainwindow.cpp \
@@ -95,6 +97,8 @@ HEADERS += \
     base/uuid/uuidP.h \
     base/uuid/uuidd.h \
     common/evideorender.h \
+    common/qt/ecolbtn.h \
+    common/qt/eimagebtn.h \
     eWebRequest.h \
     mainwindow.h \
     playdialog.h

@@ -19,7 +19,7 @@ MainWindow::MainWindow(QWidget *parent)
     this->setFocusPolicy(Qt::WheelFocus);
 
     QPalette pal(this->palette());
-    pal.setColor(QPalette::Background, Qt::black);
+    pal.setColor(QPalette::Window, Qt::black);
     this->setAutoFillBackground(true);
     this->setPalette(pal);
 
@@ -81,10 +81,10 @@ void MainWindow::resizeEvent(QResizeEvent* ev){
                                                  (const char*)ws,
                                                  (const char*)stun, 0, 1, 0, 0);
         nbase::ThreadManager::RegisterThread((int)ThreadId::kThreadRemoteControl, _trans);
-        _trans->SetWindow(this->winId(), rc.width(), rc.height());
-        _trans->Start();
+        //_trans->SetWindow(this->winId(), rc.width(), rc.height());
+        //_trans->Start();
     }else{
-        _trans->DoRoate(rc.width(), rc.height(), 0.f);
+        //_trans->DoRoate(rc.width(), rc.height(), 0.f);
     }
 }
 
