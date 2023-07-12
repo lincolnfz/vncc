@@ -1566,7 +1566,7 @@ static int open_input_file(const char* filename)
 	const AVCodec* video_dec;
 	const AVCodec* audio_dec;
 	int ret;
-/*
+
 	if ((ret = avformat_open_input(&fmt_ctx, filename, NULL, NULL)) < 0) {
 		av_log(NULL, AV_LOG_ERROR, "Cannot open input file\n");
 		return ret;
@@ -1616,14 +1616,12 @@ static int open_input_file(const char* filename)
 		av_log(NULL, AV_LOG_ERROR, "Cannot open audio decoder\n");
 		return ret;
 	}
-*/
 	return 0;
 }
 
 int eAVRender::PlayFile() {
 	printf("playfile\n");
 	int ret;
-    /*
 	AVPacket* packet;
 	AVFrame* frame;
 	AVFrame* filt_frame;
@@ -1645,7 +1643,7 @@ int eAVRender::PlayFile() {
     //std::string str_mp4 = nbase::UTF16ToUTF8(mp4_path);
     //std::string str_asci = UTF8toASCI(str_mp4.c_str());
     str_dir = GetExeDirectory();
-    sprintf(sz, "%s/rh.mp4", str_dir.c_str());
+    sprintf(sz, "%s/info.mp4", str_dir.c_str());
     if ((ret = open_input_file(sz)) < 0) {
 		goto end;
 	}
@@ -1809,7 +1807,7 @@ end:
 		char sz[128] = {0};
 		av_make_error_string(sz, 128, ret);
 		fprintf(stderr, "Error occurred: %s\n", sz);
-    }*/
+    }
 	b_play_done = true;
     printf("playfile done\n");
 	return 0;

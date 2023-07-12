@@ -4,6 +4,7 @@
 #include <econtroltrans.h>
 #include <base/base.h>
 #include <QMainWindow>
+#include <edockerwidget.h>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -31,6 +32,7 @@ protected:
     virtual void focusOutEvent(QFocusEvent *event) override;
     virtual void keyPressEvent(QKeyEvent *event) override;
     virtual void keyReleaseEvent(QKeyEvent *event) override;
+    virtual void closeEvent(QCloseEvent *event) override;
 
     void OutMouseMsg(float x, float y, int mtype);
     void OutTextMsg(QString& txt);
@@ -39,6 +41,7 @@ protected:
 
 protected:
     std::shared_ptr<eControlTrans> _trans;
+    eDockerWidget* _docker = nullptr;
 
 private:
     Ui::MainWindow *ui;

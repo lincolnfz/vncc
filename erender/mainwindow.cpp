@@ -2,6 +2,7 @@
 #include "ui_mainwindow.h"
 #include <qevent.h>
 #include <QDebug>
+#include <QHBoxLayout>
 
 //172.27.11.193:17513,cmd:172.27.11.193:17257
 
@@ -16,6 +17,24 @@ MainWindow::MainWindow(QWidget *parent)
     this->setAttribute(Qt::WA_InputMethodEnabled, true);
     this->setAttribute(Qt::WA_KeyCompression, true);
     this->setFocusPolicy(Qt::WheelFocus);
+
+    QPalette pal(this->palette());
+    pal.setColor(QPalette::Background, Qt::black);
+    this->setAutoFillBackground(true);
+    this->setPalette(pal);
+
+    //QHBoxLayout *layout = new QHBoxLayout;
+    //eDockerWidget* _docker = new eDockerWidget();
+    _docker = new eDockerWidget();
+    //_docker->resize(90, 60);
+    _docker->setWindowFlags(Qt::FramelessWindowHint);
+    _docker->show();
+    //this->setCentralWidget(_docker);
+
+    //layout->addWidget(_docker);
+    //setCentralWidget(new QWidget);
+    //centralWidget()->setLayout(layout);
+
 }
 
 MainWindow::~MainWindow()
@@ -213,6 +232,11 @@ void MainWindow::keyReleaseEvent(QKeyEvent *event){
     //qDebug() << "release" << event->text();
 
     QMainWindow::keyReleaseEvent(event);
+}
+
+void MainWindow::closeEvent(QCloseEvent *event){
+    emit _docker->close();
+    event->accept();
 }
 
 void MainWindow::OutMouseMsg(float x, float y, int mtype){

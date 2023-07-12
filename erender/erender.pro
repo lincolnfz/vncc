@@ -25,15 +25,16 @@ LIBS += $$PWD/../third_party/libevent/lib/libevent.a
 LIBS += $$PWD/../third_party/libevent/lib/libevent_pthreads.a
 #LIBS += $$PWD/../third_party/yjrtc/libyjrtc.so
 LIBS += $$PWD/../third_party/sdl/lib/libSDL2.a
-LIBS += $$PWD/../third_party/ffmpeg/lib/libavcodec.a
-LIBS += $$PWD/../third_party/ffmpeg/lib/libavformat.a
-LIBS += $$PWD/../third_party/ffmpeg/lib/libavutil.a
 LIBS += $$PWD/../third_party/ffmpeg/lib/libavfilter.a
-LIBS += $$PWD/../third_party/ffmpeg/lib/libavdevice.a
+LIBS += $$PWD/../third_party/ffmpeg/lib/libavformat.a
+LIBS += $$PWD/../third_party/ffmpeg/lib/libavcodec.a
+LIBS += $$PWD/../third_party/ffmpeg/lib/libavutil.a
 LIBS += $$PWD/../third_party/ffmpeg/lib/libswresample.a
 LIBS += $$PWD/../third_party/ffmpeg/lib/libswscale.a
+LIBS += $$PWD/../third_party/ffmpeg/lib/libavdevice.a
 LIBS += -ldl
 LIBS += -lz
+LIBS += -latomic
 
 #pragma comment(lib, "avcodec.lib")
 #pragma comment(lib, "avformat.lib")
@@ -93,6 +94,7 @@ SOURCES += \
     eAVRender.cpp \
     ePrivateProto.cpp \
     econtroltrans.cpp \
+    edockerwidget.cpp \
     main.cpp \
     mainwindow.cpp
 
@@ -140,6 +142,7 @@ HEADERS += \
     eAVRender.h \
     ePrivateProto.h \
     econtroltrans.h \
+    edockerwidget.h \
     mainwindow.h
 
 FORMS += \

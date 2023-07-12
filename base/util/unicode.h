@@ -11,10 +11,8 @@ typedef char UTF8Char;
 typedef wchar_t UTF16Char;
 typedef int32_t UTF32Char;
 #else
-//typedef int16_t UTF16Char;
-//typedef wchar_t UTF32Char;
-typedef wchar_t UTF16Char;
-typedef int32_t UTF32Char;
+typedef int16_t UTF16Char;
+typedef wchar_t UTF32Char;
 #endif
 
 typedef std::basic_string<UTF8Char> UTF8String;
