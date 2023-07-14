@@ -793,3 +793,38 @@ void eControlTrans::RButtonEvent(float x, float y, int mousetype) {
     }, mousemsg));
     nbase::ThreadManager::PostTask((int)ThreadId::kThreadRemoteControl, fn);
 }
+
+void eControlTrans::SendKeyEvent(std::string& txt){
+    nbase::StdClosure fn = ToWeakCallback(nbase::Bind([=](std::string keytxt)->void{
+        std::string msg = sProto.GenNormal(CMD_ACTION_IME_SEND_KEY_EVENT, keytxt, g_lbh_token.c_str());
+        SafeSendCmdMsg(msg);
+    }, txt));
+    nbase::ThreadManager::PostTask((int)ThreadId::kThreadRemoteControl, fn);
+}
+
+void eControlTrans::Home(){
+    nbase::StdClosure fn = ToWeakCallback(nbase::Bind([=]()->void{
+        std::string json = sProto.Home();
+        std::string msg = sProto.GenNormal(CMD_ACTION_SHELL, json, g_lbh_token.c_str());
+        SafeSendCmdMsg(msg);
+    }));
+    nbase::ThreadManager::PostTask((int)ThreadId::kThreadRemoteControl, fn);
+}
+
+void eControlTrans::Process(){
+    nbase::StdClosure fn = ToWeakCallback(nbase::Bind([=]()->void{
+        std::string json = sProto.AppSwitch();
+        std::string msg = sProto.GenNormal(CMD_ACTION_SHELL, json, g_lbh_token.c_str());
+        SafeSendCmdMsg(msg);
+    }));
+    nbase::ThreadManager::PostTask((int)ThreadId::kThreadRemoteControl, fn);
+}
+
+void eControlTrans::Return(){
+    nbase::StdClosure fn = ToWeakCallback(nbase::Bind([=]()->void{
+        std::string json = sProto.Back();
+        std::string msg = sProto.GenNormal(CMD_ACTION_SHELL, json, g_lbh_token.c_str());
+        SafeSendCmdMsg(msg);
+    }));
+    nbase::ThreadManager::PostTask((int)ThreadId::kThreadRemoteControl, fn);
+}

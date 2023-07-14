@@ -275,7 +275,9 @@ bool eAVClient::SendData(const unsigned char* data, const int len) {
 	struct event* ev = evtimer_new(eAVClient::s_base, do_send_cb, (void*)ctx);
 	ctx->ev = ev;
 	bool ret = false;
-	timeval tv;
+    event_active(ev, 0, 0);
+    ret = true;
+    /*timeval tv;
 	tv.tv_sec = 0; //try delay 0 sec
 	tv.tv_usec = 0;
 	if (ev) {
@@ -287,7 +289,7 @@ bool eAVClient::SendData(const unsigned char* data, const int len) {
 			delete ctx;
 			event_free(ev);
 		}
-	}
+    }*/
 
 	return ret;
 }

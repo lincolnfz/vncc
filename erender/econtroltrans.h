@@ -94,6 +94,10 @@ public:
     void SendTextMsg(std::string& txt);
     void SendLogEvent(std::string& txt);
     void RButtonEvent(float x, float y, int mousetype);
+    void SendKeyEvent(std::string& txt);
+    void Home();
+    void Process();
+    void Return();
 
 protected:
     bool SendTcpData(const char* name, const unsigned char* data, const int len, RecvCALLBACK, FailCALLBACK);

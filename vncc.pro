@@ -67,6 +67,7 @@ SOURCES += \
     common/eInstructions.cpp \
     common/evideorender.cpp \
     common/qt/ecolbtn.cpp \
+    common/qt/ecustomtoast.cpp \
     common/qt/eimagebtn.cpp \
     eWebRequest.cpp \
     main.cpp \
@@ -98,6 +99,7 @@ HEADERS += \
     base/uuid/uuidd.h \
     common/evideorender.h \
     common/qt/ecolbtn.h \
+    common/qt/ecustomtoast.h \
     common/qt/eimagebtn.h \
     eWebRequest.h \
     mainwindow.h \

@@ -3,16 +3,21 @@
 #include <qevent.h>
 #include <QDebug>
 #include <QHBoxLayout>
+#include <QDesktopWidget>
 
 //172.27.11.193:17513,cmd:172.27.11.193:17257
+
+extern void setbitrate(bool bauto, int bitrate);
+extern void setfps(int fps);
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
 {
     int ss = sizeof(wchar_t);
-    ui->setupUi(this);
-    this->resize( QSize( 900, 600 ));
+    //ui->setupUi(this);
+
+    //this->resize( QSize( 900, 600 ));
     //installEventFilter(this);
     this->setAttribute(Qt::WA_InputMethodEnabled, true);
     this->setAttribute(Qt::WA_KeyCompression, true);
@@ -25,15 +30,39 @@ MainWindow::MainWindow(QWidget *parent)
 
     //QHBoxLayout *layout = new QHBoxLayout;
     //eDockerWidget* _docker = new eDockerWidget();
-    _docker = new eDockerWidget();
+
+    _docker = new eDockerWidget(this);
+    int d_w = _docker->width();
     //_docker->resize(90, 60);
-    _docker->setWindowFlags(Qt::FramelessWindowHint);
+    _docker->setFixedSize(480, 300);
+    _docker->setWindowFlags(_docker->windowFlags() |
+                            Qt::FramelessWindowHint |
+                            Qt::WindowStaysOnTopHint |
+                            Qt::SubWindow);
     _docker->show();
     //this->setCentralWidget(_docker);
 
     //layout->addWidget(_docker);
     //setCentralWidget(new QWidget);
     //centralWidget()->setLayout(layout);
+    connect(_docker, &eDockerWidget::close_main_signal, this, &MainWindow::close_main);
+    connect(_docker, &eDockerWidget::fps_signal, this, &MainWindow::fps_slot);
+    connect(_docker, &eDockerWidget::bitrate_signal, this, &MainWindow::bitrate_slot);
+    connect(_docker, &eDockerWidget::return_signal, this, &MainWindow::return_slot);
+    connect(_docker, &eDockerWidget::home_signal, this, &MainWindow::home_slot);
+    connect(_docker, &eDockerWidget::process_signal, this, &MainWindow::process_slot);
+    connect(_docker, &eDockerWidget::switch_dev_signal, this, &MainWindow::switch_dev_slot);
+
+    setWindowState(Qt::WindowState::WindowFullScreen);
+    //setWindowState(Qt::WindowState::WindowMaximized);
+    QDesktopWidget* desktopWidget = QApplication::desktop();
+    //获取可用桌面大小
+    QRect deskRect = desktopWidget->availableGeometry();
+    //获取设备屏幕大小
+    QRect screenRect = desktopWidget->screenGeometry();
+    int h = screenRect.height();
+    int w = screenRect.width();
+    this->setFixedSize(w, h);
 
 }
 
@@ -83,13 +112,14 @@ void MainWindow::resizeEvent(QResizeEvent* ev){
         nbase::ThreadManager::RegisterThread((int)ThreadId::kThreadRemoteControl, _trans);
         //_trans->SetWindow(this->winId(), rc.width(), rc.height());
         //_trans->Start();
+        _docker->SetTopWindow();
     }else{
         //_trans->DoRoate(rc.width(), rc.height(), 0.f);
     }
 }
 
 void MainWindow::mousePressEvent(QMouseEvent *event){
-    QSize rc = this->size();
+    QRect rc = this->geometry();
     float norm_x = (float)event->x() / (float)rc.width();
     float norm_y = (float)event->y() / (float)rc.height();
     switch (event->button()) {
@@ -112,7 +142,7 @@ void MainWindow::mousePressEvent(QMouseEvent *event){
 }
 
 void MainWindow::mouseReleaseEvent(QMouseEvent *event){
-    QSize rc = this->size();
+    QRect rc = this->geometry();
     float norm_x = (float)event->x() / (float)rc.width();
     float norm_y = (float)event->y() / (float)rc.height();
     switch (event->button()) {
@@ -133,7 +163,7 @@ void MainWindow::mouseReleaseEvent(QMouseEvent *event){
 }
 
 void MainWindow::mouseDoubleClickEvent(QMouseEvent *event){
-    QSize rc = this->size();
+    QRect rc = this->geometry();
     float norm_x = (float)event->x() / (float)rc.width();
     float norm_y = (float)event->y() / (float)rc.height();
     switch (event->button()) {
@@ -154,7 +184,7 @@ void MainWindow::mouseDoubleClickEvent(QMouseEvent *event){
 }
 
 void MainWindow::mouseMoveEvent(QMouseEvent *event){
-    QSize rc = this->size();
+    QRect rc = this->geometry();
     float norm_x = (float)event->x() / (float)rc.width();
     float norm_y = (float)event->y() / (float)rc.height();
     Qt::MouseEventFlags flag = event->flags();
@@ -167,7 +197,7 @@ void MainWindow::mouseMoveEvent(QMouseEvent *event){
 }
 
 void MainWindow::wheelEvent(QWheelEvent *event){
-    QSize rc = this->size();
+    QRect rc = this->geometry();
     float norm_x = (float)event->x() / (float)rc.width();
     float norm_y = (float)event->y() / (float)rc.height();
     int zDelta = event->delta();
@@ -213,19 +243,89 @@ void MainWindow::keyPressEvent(QKeyEvent *event){
     bool bshift = false;
     bool balt = false;
     bool bctrl = false;
+    int nKeyCode = event->key();
     bshift = !!(modi & Qt::KeyboardModifier::ShiftModifier);
     balt = !!(modi & Qt::KeyboardModifier::AltModifier);
     bctrl = !!(modi & Qt::KeyboardModifier::ControlModifier);
     //qDebug() << "shift:" << bshift << " alt:" << balt << " ctrl:" << bctrl << " txt:" << event->text();
     if(!bctrl && !bshift && !balt){
-        QString txt = event->text();
-        OutTextMsg(txt);
+        bool trans = true;
+        std::string strText;
+        switch (nKeyCode)//系统功能键
+        {
+        case Qt::Key_Return:
+            strText = "66";
+            break;
+        case Qt::Key_Escape:
+            strText = "111";
+            break;
+        case Qt::Key_Left:
+            strText = "21";
+            break;
+        case Qt::Key_Up:
+            strText = "19";
+            break;
+        case Qt::Key_Right:
+            strText = "22";
+            break;
+        case Qt::Key_Down:
+            strText = "20";
+            break;
+        case Qt::Key_Home:
+            strText = "122";
+            break;
+        case Qt::Key_End:
+            strText = "123";
+            break;
+        case Qt::Key_PageUp:
+            strText = "92";
+            break;
+        case Qt::Key_PageDown:
+            strText = "93";
+            break;
+        case Qt::Key_Backspace:
+            strText = "67";
+            break;
+        case Qt::Key_Delete:
+            strText = "112";
+            break;
+        case Qt::Key_Insert:
+            strText = "124";
+            break;
+        case Qt::Key_Tab:
+            strText = "61";
+            break;
+        case Qt::Key_CapsLock:
+            strText = "115";
+            break;
+        case Qt::Key_Space:
+            strText = "62";
+            break;
+        case Qt::Key_Control:
+            strText = "113";
+            break;
+        case Qt::Key_Menu:
+            strText = "57";
+            break;
+        default:{
+            trans = false;
+            break;
+        }
+        }
+        if(trans){
+            KeyEvent(strText);
+        }else{
+            QString txt = event->text();
+            OutTextMsg(txt);
+        }
+
     }
     if(bctrl){
         //qDebug() << "key:" << event->key();
-        CtrlAccelrate(event->key());
+        CtrlAccelrate(nKeyCode);
     }
-    QMainWindow::keyPressEvent(event);
+    //QMainWindow::keyPressEvent(event);
+    //event->ignore();
 }
 
 void MainWindow::keyReleaseEvent(QKeyEvent *event){
@@ -287,3 +387,34 @@ void MainWindow::RButtonEvent(float x, float y, int mtype){
     _trans->RButtonEvent(x, y, mtype);
 }
 
+void MainWindow::KeyEvent(std::string& keyevent){
+    _trans->SendKeyEvent(keyevent);
+}
+
+void MainWindow::close_main(){
+    QMainWindow::close();
+}
+
+void MainWindow::fps_slot(int fps){
+    setfps(fps);
+}
+
+void MainWindow::bitrate_slot(int bitrate){
+    setbitrate(false, bitrate);
+}
+
+void MainWindow::switch_dev_slot(QString dev){
+
+}
+
+void MainWindow::home_slot(){
+    _trans->Home();
+}
+
+void MainWindow::process_slot(){
+    _trans->Process();
+}
+
+void MainWindow::return_slot(){
+    _trans->Return();
+}

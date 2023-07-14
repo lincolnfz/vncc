@@ -14,28 +14,91 @@
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="QPushButton" name="btn_conn">
+   <widget class="QTabWidget" name="tabWidget">
     <property name="geometry">
      <rect>
-      <x>220</x>
-      <y>300</y>
-      <width>341</width>
-      <height>51</height>
+      <x>20</x>
+      <y>40</y>
+      <width>751</width>
+      <height>501</height>
      </rect>
     </property>
-    <property name="text">
-     <string>PushButton</string>
+    <property name="currentIndex">
+     <number>0</number>
     </property>
-   </widget>
-   <widget class="QLineEdit" name="edit_adds">
-    <property name="geometry">
-     <rect>
-      <x>220</x>
-      <y>190</y>
-      <width>351</width>
-      <height>41</height>
-     </rect>
-    </property>
+    <widget class="QWidget" name="rh_tab">
+     <attribute name="title">
+      <string>rh</string>
+     </attribute>
+     <widget class="QStackedWidget" name="rh_group">
+      <property name="geometry">
+       <rect>
+        <x>30</x>
+        <y>40</y>
+        <width>681</width>
+        <height>391</height>
+       </rect>
+      </property>
+      <property name="currentIndex">
+       <number>0</number>
+      </property>
+      <widget class="QWidget" name="page_login">
+       <widget class="QLineEdit" name="lineEdit">
+        <property name="geometry">
+         <rect>
+          <x>120</x>
+          <y>110</y>
+          <width>411</width>
+          <height>29</height>
+         </rect>
+        </property>
+       </widget>
+       <widget class="QLineEdit" name="pwd_edit">
+        <property name="geometry">
+         <rect>
+          <x>120</x>
+          <y>170</y>
+          <width>411</width>
+          <height>31</height>
+         </rect>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="btn_login">
+        <property name="geometry">
+         <rect>
+          <x>220</x>
+          <y>240</y>
+          <width>211</width>
+          <height>41</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>PushButton</string>
+        </property>
+       </widget>
+      </widget>
+      <widget class="QWidget" name="page_launch">
+       <widget class="QPushButton" name="btn_launch">
+        <property name="geometry">
+         <rect>
+          <x>220</x>
+          <y>240</y>
+          <width>211</width>
+          <height>41</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>PushButton</string>
+        </property>
+       </widget>
+      </widget>
+     </widget>
+    </widget>
+    <widget class="QWidget" name="vnc_tab">
+     <attribute name="title">
+      <string>vnc</string>
+     </attribute>
+    </widget>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">

@@ -5,6 +5,7 @@
 #include <base/base.h>
 #include <QMainWindow>
 #include <edockerwidget.h>
+#include <QOpenGLWidget>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -19,6 +20,18 @@ public:
     virtual ~MainWindow();
     //virtual QVariant inputMethodQuery(Qt::InputMethodQuery) const override;
     //virtual bool eventFilter(QObject *watched, QEvent *event) override;
+
+signals:
+
+
+public slots:
+    void close_main();
+    void fps_slot(int);
+    void bitrate_slot(int);
+    void switch_dev_slot(QString);
+    void home_slot();
+    void process_slot();
+    void return_slot();
 
 protected:
     virtual void resizeEvent(QResizeEvent *) override;
@@ -38,6 +51,7 @@ protected:
     void OutTextMsg(QString& txt);
     void CtrlAccelrate(int keycode);
     void RButtonEvent(float x, float y, int mtype);
+    void KeyEvent(std::string& keyevent);
 
 protected:
     std::shared_ptr<eControlTrans> _trans;

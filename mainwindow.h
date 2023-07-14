@@ -47,6 +47,16 @@ protected:
 private slots:
     void on_btn_conn_clicked();
 
+    void on_btn_login_clicked();
+
+    void on_lineEdit_returnPressed();
+
+    void on_pwd_edit_returnPressed();
+
+    void on_btn_login_pressed();
+
+    void action_Login();
+
 private:
     Ui::MainWindow *ui;
     std::unique_ptr<rpc::server> _srv;

@@ -93,6 +93,7 @@ SOURCES += \
     ../common/evideorender.cpp \
     ../common/qt/ecolbtn.cpp \
     ../common/qt/eimagebtn.cpp \
+    ../common/qt/emousehover.cpp \
     eAVRender.cpp \
     ePrivateProto.cpp \
     econtroltrans.cpp \
@@ -143,6 +144,7 @@ HEADERS += \
     ../common/evideorender.h \
     ../common/qt/ecolbtn.h \
     ../common/qt/eimagebtn.h \
+    ../common/qt/emousehover.h \
     eAVRender.h \
     ePrivateProto.h \
     econtroltrans.h \

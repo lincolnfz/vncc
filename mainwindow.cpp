@@ -14,7 +14,9 @@
 #include "common/eInstructions.h"
 #include "common/defThread.h"
 #include <qwindow.h>
-
+#include <QDesktopWidget>
+#include "common/qt/ecustomtoast.h"
+#include <QSettings>
 
 
 MainWindow::MainWindow(QWidget *parent)
@@ -38,6 +40,8 @@ MainWindow::MainWindow(QWidget *parent)
 
         }, l, s));
     nbase::ThreadManager::PostTask((int)ThreadId::kThreadRemoteControl, fn2);
+
+    move(qApp->desktop()->availableGeometry(this).center()- this->rect().center());
 }
 
 MainWindow::~MainWindow()
@@ -107,7 +111,7 @@ void MainWindow::on_btn_conn_clicked()
         return;
     }
     return;
-    QString vnc_adds = this->ui->edit_adds->text();
+    QString vnc_adds;// = this->ui->edit_adds->text();
     QString app_path = QCoreApplication::applicationDirPath();
     std::string str_app_path = app_path.toStdString();
     char sz[512] = {0};
@@ -131,4 +135,56 @@ void MainWindow::test_widget(){
 
 void MainWindow::test_callback(const std::string& c, int idx){
     qDebug("test_callback %s", c.c_str());
+}
+
+void MainWindow::on_btn_login_clicked()
+{
+    action_Login();
+}
+
+void MainWindow::on_lineEdit_returnPressed()
+{
+    ui->pwd_edit->setFocus();
+}
+
+void MainWindow::on_pwd_edit_returnPressed()
+{
+    action_Login();
+}
+
+void MainWindow::on_btn_login_pressed()
+{
+    action_Login();
+}
+
+void MainWindow::action_Login(){
+    QString pwd = ui->pwd_edit->text();
+    QString acc = ui->lineEdit->text();
+    std::string str_user, str_pwd;
+    str_user = acc.toStdString();
+    str_pwd = pwd.toStdString();
+    sWebReq.RHLogin(str_user.c_str(), str_pwd.c_str(),
+        nullptr, this->GetWeakFlag(),
+        [=](std::shared_ptr<eWebRequest::eWebExchangeData> sp, void*)->void {
+            if (sp->isSucc()) {
+                _RHLOGINRET rhlogin;
+                QuickGetJsonData(sp->_data.c_str(), rhlogin);
+                char va[128] = {0};
+                sprintf(va, "%s:%d", rhlogin.DeviceData.LocalIP.c_str(), rhlogin.DeviceData.AVPort);
+                char remote[128] = {0};
+                sprintf(remote, "%s:%d", rhlogin.DeviceData.IP.c_str(), rhlogin.DeviceData.AdbPort + 512);
+                char cmd[128] = {0};
+                sprintf(cmd, "%s:%d", rhlogin.DeviceData.IP.c_str(), rhlogin.DeviceData.AdbPort + 256);
+                char ws[128] = {0};
+                sprintf(ws, "%s:%d", rhlogin.DeviceData.IP.c_str(), rhlogin.DeviceData.WebRTCPort);
+                char stun[128] = {0};
+                sprintf(stun, "%s:%d", rhlogin.DeviceData.IP.c_str(), 3478);
+                qDebug("va:%s,remote:%s,cmd:%s,ws:%s,stun:%s", va, remote, cmd, ws, stun);
+                ui->rh_group->setCurrentIndex(1);
+            }
+            else {
+                const char* utf8 = sp->_Msg.c_str();
+                CustomToast::instance().show(CustomToast::WARN, QString(sp->_Msg.c_str()));
+            }
+        });
 }
