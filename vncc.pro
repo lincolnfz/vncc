@@ -21,6 +21,7 @@ LIBS += $$PWD/third_party/openssl/lib64/libssl.a
 LIBS += $$PWD/third_party/openssl/lib64/libcrypto.a
 LIBS += -ldl
 LIBS += -lz
+LIBS += -lboost_system
 
 DESTDIR = $$PWD/../qilinout
 
@@ -70,6 +71,7 @@ SOURCES += \
     common/qt/ecustomtoast.cpp \
     common/qt/eimagebtn.cpp \
     eWebRequest.cpp \
+    eWebScoketCli.cpp \
     main.cpp \
     mainwindow.cpp \
     playdialog.cpp
@@ -102,6 +104,7 @@ HEADERS += \
     common/qt/ecustomtoast.h \
     common/qt/eimagebtn.h \
     eWebRequest.h \
+    eWebScoketCli.h \
     mainwindow.h \
     playdialog.h
 

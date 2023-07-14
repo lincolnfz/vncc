@@ -16,7 +16,6 @@
 #include <qwindow.h>
 #include <QDesktopWidget>
 #include "common/qt/ecustomtoast.h"
-#include <QSettings>
 
 
 MainWindow::MainWindow(QWidget *parent)
@@ -24,7 +23,7 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow)
 {
     _misc_thd = std::make_shared<MiscThrad>();
-    nbase::ThreadManager::RegisterThread((int)ThreadId::kThreadGL, _misc_thd);
+    nbase::ThreadManager::RegisterThread((int)ThreadId::kThreadGlobalMisc , _misc_thd);
     _misc_thd->Start();
 
     ui->setupUi(this);
@@ -42,6 +41,17 @@ MainWindow::MainWindow(QWidget *parent)
     nbase::ThreadManager::PostTask((int)ThreadId::kThreadRemoteControl, fn2);
 
     move(qApp->desktop()->availableGeometry(this).center()- this->rect().center());
+
+
+    _settings = new QSettings ("config.ini", QSettings::IniFormat);
+
+    QVariant user = _settings->value("user");
+
+    QVariant pwd = _settings->value("pwd");
+
+    ui->lineEdit->setText(user.toString());
+    ui->pwd_edit->setText(pwd.toString());
+    ui->pwd_edit->setEchoMode(QLineEdit::Password);
 }
 
 MainWindow::~MainWindow()
@@ -163,10 +173,13 @@ void MainWindow::action_Login(){
     std::string str_user, str_pwd;
     str_user = acc.toStdString();
     str_pwd = pwd.toStdString();
+
     sWebReq.RHLogin(str_user.c_str(), str_pwd.c_str(),
         nullptr, this->GetWeakFlag(),
         [=](std::shared_ptr<eWebRequest::eWebExchangeData> sp, void*)->void {
             if (sp->isSucc()) {
+                _websocket.Stop();
+
                 _RHLOGINRET rhlogin;
                 QuickGetJsonData(sp->_data.c_str(), rhlogin);
                 char va[128] = {0};
@@ -181,10 +194,24 @@ void MainWindow::action_Login(){
                 sprintf(stun, "%s:%d", rhlogin.DeviceData.IP.c_str(), 3478);
                 qDebug("va:%s,remote:%s,cmd:%s,ws:%s,stun:%s", va, remote, cmd, ws, stun);
                 ui->rh_group->setCurrentIndex(1);
+
+                //QString pwd = ui->pwd_edit->text();
+                //QString acc = ui->lineEdit->text();
+                _settings->setValue("user", acc);
+                _settings->setValue("pwd", pwd);
+                char szws[128] = {0};
+                sprintf(szws, "ws://%s:%d", rhlogin.WebSocketData.Ip.c_str(), rhlogin.WebSocketData.Port);
+                _websocket.Run(szws, str_user.c_str());
             }
             else {
                 const char* utf8 = sp->_Msg.c_str();
                 CustomToast::instance().show(CustomToast::WARN, QString(sp->_Msg.c_str()));
             }
         });
+}
+
+void MainWindow::on_btn_back_clicked()
+{
+    _websocket.Stop();
+    ui->rh_group->setCurrentIndex(0);
 }

@@ -5,6 +5,8 @@
 #include <rpc/server.h>
 #include <base/callback/callback.h>
 #include "base/thread/threadmanager.h"
+#include <QSettings>
+#include "eWebScoketCli.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -57,11 +59,16 @@ private slots:
 
     void action_Login();
 
+    void on_btn_back_clicked();
+
 private:
     Ui::MainWindow *ui;
     std::unique_ptr<rpc::server> _srv;
     unsigned short _port = 26186;
 
     std::shared_ptr<MiscThrad> _misc_thd;
+    QSettings* _settings = nullptr;
+    //std::shared_ptr<eWebScoketCli> _sp_websocket;
+    eWebScoketCli _websocket;
 };
 #endif // MAINWINDOW_H
