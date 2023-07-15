@@ -73,7 +73,7 @@
          </rect>
         </property>
         <property name="text">
-         <string>PushButton</string>
+         <string>login</string>
         </property>
        </widget>
       </widget>
@@ -88,7 +88,7 @@
          </rect>
         </property>
         <property name="text">
-         <string>PushButton</string>
+         <string>launch</string>
         </property>
        </widget>
        <widget class="QPushButton" name="btn_back">

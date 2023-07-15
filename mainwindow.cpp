@@ -27,7 +27,6 @@ MainWindow::MainWindow(QWidget *parent)
     _misc_thd->Start();
 
     ui->setupUi(this);
-    GenerateRpcLayout();
 
     nbase::StdClosure fn = ToWeakCallback(nbase::Bind([]()->void{
             qDebug("hello\n");
@@ -57,26 +56,6 @@ MainWindow::MainWindow(QWidget *parent)
 MainWindow::~MainWindow()
 {
     delete ui;
-}
-
-void MainWindow::GenerateRpcLayout(){
-    while (true) {
-        if (!testTcpPortUsed(_port)) {
-            try {
-                _srv.reset(new rpc::server(_port));
-                _srv->async_run();
-                break;
-            }
-            catch (...) {
-                //assert(false);
-            }
-
-        }
-        ++_port;
-        if (_port == 0) {
-            break;
-        }
-    }
 }
 
 void MainWindow::on_btn_conn_clicked()
@@ -214,4 +193,9 @@ void MainWindow::on_btn_back_clicked()
 {
     _websocket.Stop();
     ui->rh_group->setCurrentIndex(0);
+}
+
+void MainWindow::on_btn_launch_clicked()
+{
+
 }

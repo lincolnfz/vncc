@@ -72,6 +72,7 @@ SOURCES += \
     common/qt/eimagebtn.cpp \
     eWebRequest.cpp \
     eWebScoketCli.cpp \
+    erpcmanager.cpp \
     main.cpp \
     mainwindow.cpp \
     playdialog.cpp
@@ -105,6 +106,7 @@ HEADERS += \
     common/qt/eimagebtn.h \
     eWebRequest.h \
     eWebScoketCli.h \
+    erpcmanager.h \
     mainwindow.h \
     playdialog.h
 

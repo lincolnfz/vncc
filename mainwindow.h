@@ -2,7 +2,6 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include <rpc/server.h>
 #include <base/callback/callback.h>
 #include "base/thread/threadmanager.h"
 #include <QSettings>
@@ -40,7 +39,6 @@ public:
     virtual ~MainWindow();
 
 protected:
-    void GenerateRpcLayout();
 
     void test_widget();
 
@@ -61,10 +59,11 @@ private slots:
 
     void on_btn_back_clicked();
 
+    void on_btn_launch_clicked();
+
 private:
     Ui::MainWindow *ui;
-    std::unique_ptr<rpc::server> _srv;
-    unsigned short _port = 26186;
+
 
     std::shared_ptr<MiscThrad> _misc_thd;
     QSettings* _settings = nullptr;
