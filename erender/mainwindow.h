@@ -6,6 +6,8 @@
 #include <QMainWindow>
 #include <edockerwidget.h>
 #include <QOpenGLWidget>
+#include <rpc/server.h>
+#include <rpc/client.h>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -16,7 +18,7 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    MainWindow(QWidget *parent = nullptr);
+    MainWindow(int keyid, short port, QWidget *parent = nullptr);
     virtual ~MainWindow();
     //virtual QVariant inputMethodQuery(Qt::InputMethodQuery) const override;
     //virtual bool eventFilter(QObject *watched, QEvent *event) override;
@@ -53,11 +55,18 @@ protected:
     void RButtonEvent(float x, float y, int mtype);
     void KeyEvent(std::string& keyevent);
 
+    void ConnectSrv(short int port);
+
 protected:
     std::shared_ptr<eControlTrans> _trans;
     eDockerWidget* _docker = nullptr;
+    std::unique_ptr<rpc::server> _rpc_srv;
+    std::unique_ptr<rpc::client> _rpc_cli;
 
 private:
     Ui::MainWindow *ui;
+    unsigned short _port = 30156;
+    int _keyid = 0;
+
 };
 #endif // MAINWINDOW_H

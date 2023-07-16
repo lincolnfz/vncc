@@ -16,7 +16,7 @@
 #include <qwindow.h>
 #include <QDesktopWidget>
 #include "common/qt/ecustomtoast.h"
-
+#include "erpcmanager.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -161,6 +161,11 @@ void MainWindow::action_Login(){
 
                 _RHLOGINRET rhlogin;
                 QuickGetJsonData(sp->_data.c_str(), rhlogin);
+                _avport = rhlogin.DeviceData.AVPort;
+                _webrtcport = rhlogin.DeviceData.WebRTCPort;
+                _adbport = rhlogin.DeviceData.AdbPort;
+                _ip = rhlogin.DeviceData.IP;
+                _localp_ip = rhlogin.DeviceData.LocalIP;
                 char va[128] = {0};
                 sprintf(va, "%s:%d", rhlogin.DeviceData.LocalIP.c_str(), rhlogin.DeviceData.AVPort);
                 char remote[128] = {0};
@@ -197,5 +202,28 @@ void MainWindow::on_btn_back_clicked()
 
 void MainWindow::on_btn_launch_clicked()
 {
+    RunPlayer();
+}
 
+void MainWindow::RunPlayer(){
+    static int id = 0;
+    ++id;
+    QString app_path = QCoreApplication::applicationDirPath();
+    std::string str_app_path = app_path.toStdString();
+    char sz[512] = {0};
+    sprintf(sz, "%s/erender", str_app_path.c_str());
+    QString app_file = QString::fromStdString(sz);
+    QStringList arguments;
+    nlohmann::json root;
+    root["port"] = sRpcManager.port();
+    root["keyid"] = id;
+    root["adb"] = _adbport;
+    root["avport"] = _avport;
+    root["webrtc"] = _webrtcport;
+    root["ip"] = _ip;
+    root["lcoal_ip"] = _localp_ip;
+
+    arguments << QString::fromStdString(root.dump());
+    QProcess proces(this);
+    proces.startDetached(app_file, arguments);
 }

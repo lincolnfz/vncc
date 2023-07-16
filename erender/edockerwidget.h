@@ -39,7 +39,7 @@ protected:
 
     void HideWindow();
     void ShowWindow();
-
+    void resetTimer();
 
 
 private:

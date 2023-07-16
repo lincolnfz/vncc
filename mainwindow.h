@@ -44,6 +44,8 @@ protected:
 
     void test_callback(const std::string& c, int idx);
 
+    void RunPlayer();
+
 private slots:
     void on_btn_conn_clicked();
 
@@ -69,5 +71,10 @@ private:
     QSettings* _settings = nullptr;
     //std::shared_ptr<eWebScoketCli> _sp_websocket;
     eWebScoketCli _websocket;
+    int _avport = 0;
+    int _adbport = 0;
+    int _webrtcport = 0;
+    std::string _ip;
+    std::string _localp_ip;
 };
 #endif // MAINWINDOW_H

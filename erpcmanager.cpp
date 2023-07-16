@@ -1,8 +1,15 @@
 #include "erpcmanager.h"
 #include "base/misctool.h"
 
+
+eRpcManager* eRpcManager::g_inst = nullptr;
+
 eRpcManager::eRpcManager()
 {
+    g_inst = this;
+}
+
+eRpcManager::~eRpcManager(){
 
 }
 
@@ -39,7 +46,7 @@ void eRpcManager::rpc_goto_device_handle(int id, std::string device){
 void eRpcManager::slot_help_rpc_connect(int id, short port){
     auto got = _rpc_clis.find(id);
     if(got == _rpc_clis.end()){
-        _rpc_clis.insert(std::make_pair(id, std::make_unique<rpc::client>(port)));
+        _rpc_clis.insert(std::make_pair(id, std::make_unique<rpc::client>("127.0.0.1", port)));
     }
 }
 

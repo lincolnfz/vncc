@@ -9,10 +9,12 @@
 
 extern void setbitrate(bool bauto, int bitrate);
 extern void setfps(int fps);
+extern int adbport, webrtcport, avport;
+extern std::string ip, local_ip;
 
-MainWindow::MainWindow(QWidget *parent)
-    : QMainWindow(parent)
-    , ui(new Ui::MainWindow)
+MainWindow::MainWindow(int keyid, short port, QWidget *parent)
+    :QMainWindow(parent)
+    , ui(new Ui::MainWindow), _keyid(keyid)
 {
     int ss = sizeof(wchar_t);
     //ui->setupUi(this);
@@ -31,14 +33,14 @@ MainWindow::MainWindow(QWidget *parent)
     //QHBoxLayout *layout = new QHBoxLayout;
     //eDockerWidget* _docker = new eDockerWidget();
 
-    _docker = new eDockerWidget(this);
+    _docker = new eDockerWidget();
     int d_w = _docker->width();
     //_docker->resize(90, 60);
+    this->setWindowFlags(windowFlags() | Qt::WindowStaysOnTopHint);
     _docker->setFixedSize(480, 300);
     _docker->setWindowFlags(_docker->windowFlags() |
-                            Qt::FramelessWindowHint |
-                            Qt::WindowStaysOnTopHint |
-                            Qt::SubWindow);
+                            Qt::BypassWindowManagerHint |
+                            Qt::WindowStaysOnTopHint);
     _docker->show();
     //this->setCentralWidget(_docker);
 
@@ -53,7 +55,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(_docker, &eDockerWidget::process_signal, this, &MainWindow::process_slot);
     connect(_docker, &eDockerWidget::switch_dev_signal, this, &MainWindow::switch_dev_slot);
 
-    setWindowState(Qt::WindowState::WindowFullScreen);
+    setWindowState(Qt::WindowState::WindowActive);
     //setWindowState(Qt::WindowState::WindowMaximized);
     QDesktopWidget* desktopWidget = QApplication::desktop();
     //获取可用桌面大小
@@ -64,6 +66,7 @@ MainWindow::MainWindow(QWidget *parent)
     int w = screenRect.width();
     this->setFixedSize(w, h);
 
+    ConnectSrv(port);
 }
 
 MainWindow::~MainWindow()
@@ -88,11 +91,11 @@ bool MainWindow::eventFilter(QObject *watched, QEvent *event){
 void MainWindow::resizeEvent(QResizeEvent* ev){
     const QSize rc = ev->size();
     if(_trans == nullptr){
-        int avport = 17001;
-        int adbport = 15001;
-        int WebRTCPort = 25002;
-        std::string ip = "172.27.11.193";
-        std::string local_ip = "172.27.11.193";
+        //int avport = 17001;
+        //int adbport = 15001;
+        //int webrtcport = 25002;
+        //std::string ip = "172.27.11.193";
+        //std::string local_ip = "172.27.11.193";
         char va[128] = {0};
         sprintf(va, "%s:%d", local_ip.c_str(), avport);
         char remote[128] = {0};
@@ -100,7 +103,7 @@ void MainWindow::resizeEvent(QResizeEvent* ev){
         char cmd[128] = {0};
         sprintf(cmd, "%s:%d", ip.c_str(), adbport+ 256);
         char ws[128] = {0};
-        sprintf(ws, "ws://%s:%d", ip.c_str(), WebRTCPort);
+        sprintf(ws, "ws://%s:%d", ip.c_str(), webrtcport);
         char stun[128] = {0};
         sprintf(stun, "stun:%s:%d", ip.c_str(), 3478);
         _trans = std::make_shared<eControlTrans>((enum ThreadId)0, "", "",
@@ -110,12 +113,15 @@ void MainWindow::resizeEvent(QResizeEvent* ev){
                                                  (const char*)ws,
                                                  (const char*)stun, 0, 1, 0, 0);
         nbase::ThreadManager::RegisterThread((int)ThreadId::kThreadRemoteControl, _trans);
-        //_trans->SetWindow(this->winId(), rc.width(), rc.height());
-        //_trans->Start();
+        _trans->SetWindow(this->winId(), rc.width(), rc.height());
+        _trans->Start();
         _docker->SetTopWindow();
     }else{
         //_trans->DoRoate(rc.width(), rc.height(), 0.f);
     }
+    //this->setWindowFlags(windowFlags() & ~Qt::WindowStaysOnTopHint);
+    //_docker->activateWindow();
+    //_docker->show();
 }
 
 void MainWindow::mousePressEvent(QMouseEvent *event){
@@ -417,4 +423,30 @@ void MainWindow::process_slot(){
 
 void MainWindow::return_slot(){
     _trans->Return();
+}
+
+void MainWindow::ConnectSrv(short int srv_port){
+    while (true) {
+        if (!testTcpPortUsed(_port)) {
+            try {
+                _rpc_srv.reset(new rpc::server(_port));
+                _rpc_srv->async_run();
+                break;
+            }
+            catch (...) {
+                //assert(false);
+            }
+
+        }
+        ++_port;
+        if (_port == 0) {
+            break;
+        }
+    }
+    _rpc_cli = std::make_unique<rpc::client>("127.0.0.1", srv_port);
+    try {
+         _rpc_cli->async_call("connect_rpc", _keyid, _port);
+    }catch(...){
+
+    }
 }

@@ -111,12 +111,24 @@ void eDockerWidget::mouseMoveEvent(QMouseEvent *event){
     qDebug() << "move" << QString(GetCurrentTimeStamp(1).c_str());
 }
 
+void eDockerWidget::resetTimer(){
+    if(_timer_id){
+        killTimer(_timer_id);
+        _timer_id = 0;
+    }
+    _timer_id = startTimer(2000);
+}
+
 void eDockerWidget::slot_MouseTrack(QObject*, QString objName){
     if (objName == "mouse out"){
         qDebug() << "track out" << QString(GetCurrentTimeStamp(1).c_str());
+        resetTimer();
         HideWindow();
     }else{
         qDebug() << "track in" << QString(GetCurrentTimeStamp(1).c_str());
+        if(_timer_id){
+            killTimer(_timer_id);
+        }
         ShowWindow();
     }
 }

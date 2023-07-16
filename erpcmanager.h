@@ -6,7 +6,7 @@
 #include <rpc/client.h>
 #include <boost/serialization/singleton.hpp>
 
-class eRpcManager : public QOjbect, public boost::serialization::singleton<eRpcManager>
+class eRpcManager : public QObject, public boost::serialization::singleton<eRpcManager>
 {
     Q_OBJECT;
 public:
@@ -35,6 +35,8 @@ private:
     std::unique_ptr<rpc::server> _rpc_srv;
     std::map<unsigned int, std::unique_ptr<rpc::client>> _rpc_clis;
     unsigned short _port = 26186;
+
+    static eRpcManager* g_inst;
 };
 
 typedef boost::serialization::singleton<eRpcManager> singleton_RpcManager; // Ê¹ÓÃÄ£°åµÄ·½Ê½Ö»ÔÊÐíµ¥¸öÊµÀý
