@@ -92,6 +92,7 @@ SOURCES += \
     ../common/eInstructions.cpp \
     ../common/evideorender.cpp \
     ../common/qt/ecolbtn.cpp \
+    ../common/qt/ecustomtoast.cpp \
     ../common/qt/eimagebtn.cpp \
     ../common/qt/emousehover.cpp \
     eAVRender.cpp \
@@ -143,6 +144,7 @@ HEADERS += \
     ../common/eInstructions.h \
     ../common/evideorender.h \
     ../common/qt/ecolbtn.h \
+    ../common/qt/ecustomtoast.h \
     ../common/qt/eimagebtn.h \
     ../common/qt/emousehover.h \
     eAVRender.h \

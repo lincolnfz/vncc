@@ -12,10 +12,13 @@ extern void setfps(int fps);
 extern int adbport, webrtcport, avport;
 extern std::string ip, local_ip;
 
+MainWindow* MainWindow::g_inst = nullptr;
+
 MainWindow::MainWindow(int keyid, short port, QWidget *parent)
     :QMainWindow(parent)
     , ui(new Ui::MainWindow), _keyid(keyid)
 {
+    MainWindow::g_inst = this;
     int ss = sizeof(wchar_t);
     //ui->setupUi(this);
 
@@ -37,7 +40,7 @@ MainWindow::MainWindow(int keyid, short port, QWidget *parent)
     int d_w = _docker->width();
     //_docker->resize(90, 60);
     this->setWindowFlags(windowFlags() | Qt::WindowStaysOnTopHint);
-    _docker->setFixedSize(480, 300);
+    _docker->setFixedSize(440, 300);
     _docker->setWindowFlags(_docker->windowFlags() |
                             Qt::BypassWindowManagerHint |
                             Qt::WindowStaysOnTopHint);
@@ -54,6 +57,7 @@ MainWindow::MainWindow(int keyid, short port, QWidget *parent)
     connect(_docker, &eDockerWidget::home_signal, this, &MainWindow::home_slot);
     connect(_docker, &eDockerWidget::process_signal, this, &MainWindow::process_slot);
     connect(_docker, &eDockerWidget::switch_dev_signal, this, &MainWindow::switch_dev_slot);
+    connect(this, &MainWindow::Show_dev_signal, _docker, &eDockerWidget::Show_dev_slot);
 
     setWindowState(Qt::WindowState::WindowActive);
     //setWindowState(Qt::WindowState::WindowMaximized);
@@ -91,11 +95,11 @@ bool MainWindow::eventFilter(QObject *watched, QEvent *event){
 void MainWindow::resizeEvent(QResizeEvent* ev){
     const QSize rc = ev->size();
     if(_trans == nullptr){
-        //int avport = 17001;
-        //int adbport = 15001;
-        //int webrtcport = 25002;
-        //std::string ip = "172.27.11.193";
-        //std::string local_ip = "172.27.11.193";
+        //avport = 17001;
+        //adbport = 15001;
+        //webrtcport = 25002;
+        //ip = "172.27.11.193";
+        //local_ip = "172.27.11.193";
         char va[128] = {0};
         sprintf(va, "%s:%d", local_ip.c_str(), avport);
         char remote[128] = {0};
@@ -410,7 +414,14 @@ void MainWindow::bitrate_slot(int bitrate){
 }
 
 void MainWindow::switch_dev_slot(QString dev){
+    if(_rpc_cli){
+        try {
+            qDebug() << "switch_dev_slot:" << QString(dev.toStdString().c_str());
+             _rpc_cli->async_call("goto_device", _keyid, dev.toStdString());
+        }catch(...){
 
+        }
+    }
 }
 
 void MainWindow::home_slot(){
@@ -430,6 +441,7 @@ void MainWindow::ConnectSrv(short int srv_port){
         if (!testTcpPortUsed(_port)) {
             try {
                 _rpc_srv.reset(new rpc::server(_port));
+                _rpc_srv->bind("active_device", &MainWindow::active_device_handle);
                 _rpc_srv->async_run();
                 break;
             }
@@ -443,10 +455,18 @@ void MainWindow::ConnectSrv(short int srv_port){
             break;
         }
     }
+    QString msg = QString("connect %1, myport %2").arg(srv_port).arg(_port);
+    qDebug() << msg;
     _rpc_cli = std::make_unique<rpc::client>("127.0.0.1", srv_port);
     try {
          _rpc_cli->async_call("connect_rpc", _keyid, _port);
     }catch(...){
-
+        qDebug() << "connect_rpc error";
     }
+}
+
+void MainWindow::active_device_handle(std::string dev){
+    QString qdev(dev.c_str());
+    qDebug() << "active:" << qdev;
+    emit MainWindow::g_inst->Show_dev_signal(qdev);
 }

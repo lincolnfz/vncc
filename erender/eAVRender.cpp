@@ -1675,7 +1675,7 @@ int eAVRender::PlayFile() {
 
 				frame->pts = frame->best_effort_timestamp;
 
-                usleep(16);
+                av_usleep(22);
 				{
 					//play
 					bool bsucc = false;

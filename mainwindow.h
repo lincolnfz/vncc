@@ -38,6 +38,9 @@ public:
     MainWindow(QWidget *parent = nullptr);
     virtual ~MainWindow();
 
+signals:
+
+
 protected:
 
     void test_widget();
@@ -45,6 +48,12 @@ protected:
     void test_callback(const std::string& c, int idx);
 
     void RunPlayer();
+
+    int id(){return _id;};
+
+    virtual void mousePressEvent(QMouseEvent *event) override;
+    virtual void mouseReleaseEvent(QMouseEvent *event) override;
+    virtual void mouseMoveEvent(QMouseEvent *event) override;
 
 private slots:
     void on_btn_conn_clicked();
@@ -63,6 +72,14 @@ private slots:
 
     void on_btn_launch_clicked();
 
+
+
+    void on_btn_vnc_login_clicked();
+
+    void slot_show_btns(QString);
+
+    void slot_show();
+
 private:
     Ui::MainWindow *ui;
 
@@ -70,11 +87,16 @@ private:
     std::shared_ptr<MiscThrad> _misc_thd;
     QSettings* _settings = nullptr;
     //std::shared_ptr<eWebScoketCli> _sp_websocket;
-    eWebScoketCli _websocket;
+    //eWebScoketCli _websocket;
     int _avport = 0;
     int _adbport = 0;
     int _webrtcport = 0;
     std::string _ip;
     std::string _localp_ip;
+    int _id = 0;
+    QString _qstr_btns;
+
+    //创建点对象,记录鼠标点击时的坐标
+    QPoint clickPos;
 };
 #endif // MAINWINDOW_H

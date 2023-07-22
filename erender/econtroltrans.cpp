@@ -509,7 +509,7 @@ void eControlTrans::RemoteConnectCB(void* user_arg) {
         gTrans->_remote_client.SendData((unsigned char*)first, strlen(first));
         bfirst = false;
     }*/
-    gTrans->SendSwitchLang();
+    //gTrans->SendSwitchLang();
     //连接视频流的工作与连反控分开执行
     //nbase::ThreadManager::PostTask((int)ThreadId::kThreadRemoteControl,
     //    nbase::Bind(&eControlTrans::StartRender, gTrans));
@@ -557,6 +557,7 @@ void eControlTrans::goDisconnect(const char* fn_name, const int disconnect_type)
     if (!gDone) {
         try {
             //_client->async_call(fn_name, _keyid, disconnect_type);
+            exit(0);
         }
         catch (...) {
             int i = 0;

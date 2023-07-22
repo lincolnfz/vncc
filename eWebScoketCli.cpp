@@ -3,6 +3,7 @@
 #include "common/defThread.h"
 //#include "../common/eEumExitCode.h"
 #include <QDebug>
+#include "erpcmanager.h"
 
 using websocketpp::lib::placeholders::_1;
 using websocketpp::lib::placeholders::_2;
@@ -36,6 +37,12 @@ bool eWebScoketCli::on_validate(websocketpp::connection_hdl hdl) {
     return true;
 }
 
+void eWebScoketCli::Show_btns_slot(QString clients){
+    std::string strclients = clients.toStdString();
+    qDebug() << "clients:" << QString(strclients.c_str());
+    sRpcManager.ShowBtns(strclients);
+}
+
 // This message handler will be invoked once for each incoming message. It
 // prints the message and then sends a copy of the message back to the server.
 void eWebScoketCli::on_message(client* c, websocketpp::connection_hdl hdl, message_ptr msg) {
@@ -46,7 +53,7 @@ void eWebScoketCli::on_message(client* c, websocketpp::connection_hdl hdl, messa
     if (strcmp(msg->get_payload().c_str(), "show") == 0) {
         nbase::StdClosure fn = ToWeakCallback(nbase::Bind([this]()->void {
             //call render
-
+            emit sWebsocket.Launch_signal();
             }));
         //nbase::ThreadManager::PostTask((int)ThreadId::kThreadUI, fn);
     }
@@ -84,11 +91,8 @@ void eWebScoketCli::on_message(client* c, websocketpp::connection_hdl hdl, messa
             root = nlohmann::json::parse(msg->get_payload().c_str(), nullptr, true);
             if (root.find("clients") != root.end() && !root.at("clients").is_null()) {
                 std::string strclients = root["clients"];
-                nbase::StdClosure fn = ToWeakCallback(nbase::Bind([this](std::string strclients)->void {
-                     // docker 要显示的端 (ShowSwitchBtn)
+                emit this->ShowBtns_signal(QString(strclients.c_str()));
 
-                    }, strclients));
-                //nbase::ThreadManager::PostTask((int)ThreadId::kThreadUI, fn);
             }
         }
         catch (nlohmann::json::parse_error& e) {
@@ -181,6 +185,7 @@ void eWebScoketCli::ReConnect() {
 
 eWebScoketCli::eWebScoketCli() {
     //eWebScoketCli::g_inst = this;
+    connect(this, &eWebScoketCli::ShowBtns_signal, this, &eWebScoketCli::Show_btns_slot);
 }
 
 
@@ -270,7 +275,7 @@ void eWebScoketCli::Stop() {
 void eWebScoketCli::LoginWindow() {
     nlohmann::json jRoot;
     jRoot["ope"] = "login";
-    jRoot["Device"] = "window";
+    jRoot["Device"] = "qilin";
     jRoot["userid"] = _strUser;
     std::string str_login = jRoot.dump();
     try {
@@ -282,12 +287,17 @@ void eWebScoketCli::LoginWindow() {
 }
 
 void eWebScoketCli::SwitchDevice(DEVICE device) {
-    static std::string devices[] = {"phone","pad","tv","box"};
+    static std::string devices[] = {"phone","pad","tv","box","ios"};
+    SwitchDevice(devices[(int)device]);
+}
+
+void eWebScoketCli::SwitchDevice(std::string device){
+    static std::string devices[] = {"phone","pad","tv","box","ios"};
     char szmsg[96] = {0};
-    sprintf(szmsg, R"({ "ope":"goto", "DeviceType":"%s"})", devices[(int)device].c_str());
+    sprintf(szmsg, R"({ "ope":"goto", "DeviceType":"%s"})", device.c_str());
     nlohmann::json jRoot;
     jRoot["ope"] = "goto";
-    jRoot["DeviceType"] = devices[(int)device];
+    jRoot["DeviceType"] = device;
     jRoot["userid"] = _strUser;
     std::string msg;
     msg = jRoot.dump();

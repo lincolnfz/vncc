@@ -24,7 +24,7 @@ public:
     //virtual bool eventFilter(QObject *watched, QEvent *event) override;
 
 signals:
-
+    void Show_dev_signal(QString);
 
 public slots:
     void close_main();
@@ -49,6 +49,8 @@ protected:
     virtual void keyReleaseEvent(QKeyEvent *event) override;
     virtual void closeEvent(QCloseEvent *event) override;
 
+    static void active_device_handle(std::string dev);
+
     void OutMouseMsg(float x, float y, int mtype);
     void OutTextMsg(QString& txt);
     void CtrlAccelrate(int keycode);
@@ -67,6 +69,7 @@ private:
     Ui::MainWindow *ui;
     unsigned short _port = 30156;
     int _keyid = 0;
+    static MainWindow* g_inst;
 
 };
 #endif // MAINWINDOW_H

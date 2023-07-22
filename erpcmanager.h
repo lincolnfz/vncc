@@ -15,20 +15,21 @@ public:
     unsigned short port() const {
         return _port;
     }
+    void GenerateRpcLayout();
+    void ShowBtns(std::string clients);
 
 signals:
     void signal_help_rpc_connect(int id, short port);
-    void signal_help_rcp_goto_device(int id, std::string device);
+    void signal_help_rcp_goto_device(int id, QString device);
 
 protected slots:
     void slot_help_rpc_connect(int id, short port);
-    void slot_help_rcp_goto_device(int id, std::string device);
+    void slot_help_rcp_goto_device(int id, QString device);
 
 
 protected:
-    void GenerateRpcLayout();
 
-    static void rpc_connect_handle(int id, unsigned short port);
+    static void rpc_connect_handle(int id, int port);
     static void rpc_goto_device_handle(int id, std::string device);
 
 private:

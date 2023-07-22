@@ -2,6 +2,7 @@
 #include "ui_mainwindow.h"
 #include <qprocess.h>
 #include <qdialog.h>
+#include <QDebug>
 #include<errno.h>
 #include<sys/types.h>
 #include<sys/socket.h>
@@ -15,8 +16,10 @@
 #include "common/defThread.h"
 #include <qwindow.h>
 #include <QDesktopWidget>
+#include <QMouseEvent>
 #include "common/qt/ecustomtoast.h"
 #include "erpcmanager.h"
+
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -48,9 +51,27 @@ MainWindow::MainWindow(QWidget *parent)
 
     QVariant pwd = _settings->value("pwd");
 
+    QVariant vncip = _settings->value("vncip");
+
     ui->lineEdit->setText(user.toString());
     ui->pwd_edit->setText(pwd.toString());
     ui->pwd_edit->setEchoMode(QLineEdit::Password);
+    sRpcManager.GenerateRpcLayout();
+
+    ui->edit_vnc_addr->setText(vncip.toString());
+
+    QPixmap pixmap("btnimg/demo_bk.png");
+    QPalette palette;
+    palette.setBrush(backgroundRole(), QBrush(pixmap));
+    setPalette(palette);
+    connect(&sWebsocket, &eWebScoketCli::ShowBtns_signal, this, &MainWindow::slot_show_btns);
+    connect(&sWebsocket, &eWebScoketCli::Launch_signal, this, &MainWindow::slot_show);
+
+    setWindowFlags( Qt::FramelessWindowHint);
+    //setFixedSize(743, 580);
+    //QStatusBar *statusBar = new QStatusBar();
+    //statusBar->setSizeGripEnabled(false); // 将状态栏的大小设置为0
+    //setStatusBar(statusBar);
 }
 
 MainWindow::~MainWindow()
@@ -103,11 +124,13 @@ void MainWindow::on_btn_conn_clicked()
     QString vnc_adds;// = this->ui->edit_adds->text();
     QString app_path = QCoreApplication::applicationDirPath();
     std::string str_app_path = app_path.toStdString();
-    char sz[512] = {0};
-    sprintf(sz, "%s/SDLvncviewer", str_app_path.c_str());
+    char sz[512] = "xtigervncviewer";
+    //sprintf(sz, "%s/SDLvncviewer", str_app_path.c_str());
     QString app_file = QString::fromStdString(sz);
     QStringList arguments;
     arguments << vnc_adds;
+    arguments << "--FullScreen";
+    arguments << "--normalcursor";
     QProcess proces(this);
     proces.startDetached(app_file, arguments);
     //proces.waitForFinished();
@@ -157,7 +180,7 @@ void MainWindow::action_Login(){
         nullptr, this->GetWeakFlag(),
         [=](std::shared_ptr<eWebRequest::eWebExchangeData> sp, void*)->void {
             if (sp->isSucc()) {
-                _websocket.Stop();
+                sWebsocket.Stop();
 
                 _RHLOGINRET rhlogin;
                 QuickGetJsonData(sp->_data.c_str(), rhlogin);
@@ -185,7 +208,7 @@ void MainWindow::action_Login(){
                 _settings->setValue("pwd", pwd);
                 char szws[128] = {0};
                 sprintf(szws, "ws://%s:%d", rhlogin.WebSocketData.Ip.c_str(), rhlogin.WebSocketData.Port);
-                _websocket.Run(szws, str_user.c_str());
+                sWebsocket.Run(szws, str_user.c_str());
             }
             else {
                 const char* utf8 = sp->_Msg.c_str();
@@ -196,7 +219,7 @@ void MainWindow::action_Login(){
 
 void MainWindow::on_btn_back_clicked()
 {
-    _websocket.Stop();
+    sWebsocket.Stop();
     ui->rh_group->setCurrentIndex(0);
 }
 
@@ -206,8 +229,7 @@ void MainWindow::on_btn_launch_clicked()
 }
 
 void MainWindow::RunPlayer(){
-    static int id = 0;
-    ++id;
+    ++_id;
     QString app_path = QCoreApplication::applicationDirPath();
     std::string str_app_path = app_path.toStdString();
     char sz[512] = {0};
@@ -216,7 +238,7 @@ void MainWindow::RunPlayer(){
     QStringList arguments;
     nlohmann::json root;
     root["port"] = sRpcManager.port();
-    root["keyid"] = id;
+    root["keyid"] = _id;
     root["adb"] = _adbport;
     root["avport"] = _avport;
     root["webrtc"] = _webrtcport;
@@ -226,4 +248,55 @@ void MainWindow::RunPlayer(){
     arguments << QString::fromStdString(root.dump());
     QProcess proces(this);
     proces.startDetached(app_file, arguments);
+}
+
+void MainWindow::on_btn_vnc_login_clicked()
+{
+    QString vnc_adds = this->ui->edit_vnc_addr->text();
+    if(vnc_adds.length() == 0){
+        return;
+    }
+    _settings->setValue("vncip", vnc_adds);
+    QString app_path = QCoreApplication::applicationDirPath();
+    std::string str_app_path = app_path.toStdString();
+    char sz[512] = "xtigervncviewer";
+    //sprintf(sz, "%s/SDLvncviewer", str_app_path.c_str());
+    QString app_file = QString::fromStdString(sz);
+    QStringList arguments;
+    arguments << vnc_adds;
+    arguments << "--FullScreen";
+    arguments << "--DotWhenNoCursor=1";
+    //arguments << "--normalcursor";
+    QProcess proces(this);
+    proces.startDetached(app_file, arguments);
+}
+
+void MainWindow::slot_show_btns(QString qstr_btns){
+    qDebug() << "mainwindow:" << qstr_btns;
+    _qstr_btns = qstr_btns;
+}
+
+void MainWindow::slot_show(){
+    RunPlayer();
+}
+
+void MainWindow::mousePressEvent(QMouseEvent *event){
+    if (event->button() == Qt::LeftButton)
+    {
+        clickPos.setX(event->pos().x());
+        clickPos.setY(event->pos().y());
+    }
+    QMainWindow::mousePressEvent(event);
+}
+
+void MainWindow::mouseReleaseEvent(QMouseEvent *event){
+    QMainWindow::mouseReleaseEvent(event);
+}
+
+void MainWindow::mouseMoveEvent(QMouseEvent *event){
+    if (event->buttons() == Qt::LeftButton)
+    {
+        this->move(this->pos()+event->pos()-this->clickPos);
+    }
+    QMainWindow::mouseMoveEvent(event);
 }

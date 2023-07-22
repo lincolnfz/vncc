@@ -6,12 +6,10 @@
 #include <QVBoxLayout>
 #include <QLabel>
 #include <QResizeEvent>
-#include <common/qt/eimagebtn.h>
-#include <common/qt/ecolbtn.h>
 #include <QDebug>
 #include <base/misctool.h>
 #include <common/qt/emousehover.h>
-
+#include <common/qt/ecustomtoast.h>
 
 eDockerWidget::eDockerWidget(QWidget *parent) : QWidget(parent)
 {
@@ -20,10 +18,14 @@ eDockerWidget::eDockerWidget(QWidget *parent) : QWidget(parent)
     QHBoxLayout *edge_layout = new QHBoxLayout;
 
     //手机 平板 tv 机顶盒
-    eImageBtn *button1 = new eImageBtn(90, 90, "btnimg/phone_gray.png", "手机");
-    eImageBtn *button2 = new eImageBtn(90, 90, "btnimg/pad_gray.png", "平板");
-    eImageBtn *button3 = new eImageBtn(90, 90, "btnimg/tv_gray.png", "tv");
-    eImageBtn *button4 = new eImageBtn(90, 90, "btnimg/stb_gray.png", "机顶盒");
+    button1 = new eImageBtn(92, 100, "btnimg/phone_gray.png", "btnimg/phone.png",
+                                       "手机", "rgb(220,220,220)", "rgb(0,114,255)");
+    button2 = new eImageBtn(92, 100, "btnimg/pad_gray.png", "btnimg/pad.png",
+                                       "平板", "rgb(220,220,220)", "rgb(0,114,255)");
+    button3 = new eImageBtn(92, 100, "btnimg/tv_gray.png", "btnimg/tv.png",
+                                       "电视", "rgb(220,220,220)", "rgb(0,114,255)");
+    button4 = new eImageBtn(92, 100, "btnimg/stb_gray.png", "btnimg/stb.png",
+                                       "机顶盒", "rgb(220,220,220)", "rgb(0,114,255)");
 
     edge_layout->addWidget(button1);
     edge_layout->addWidget(button2);
@@ -32,10 +34,16 @@ eDockerWidget::eDockerWidget(QWidget *parent) : QWidget(parent)
     main_layout->addLayout(edge_layout);
 
     QHBoxLayout *fps_layout = new QHBoxLayout;
-    QLabel *label = new QLabel("帧率");
-    ecolbtn* btn_30fps = new ecolbtn(120, 30, "rgb(0,0,0)", "rgb(0,0,255)", "30");
-    ecolbtn* btn_48fps = new ecolbtn(120, 30, "rgb(0,0,0)", "rgb(0,0,255)", "48");
-    ecolbtn* btn_60fps = new ecolbtn(120, 30, "rgb(0,0,0)", "rgb(0,0,255)", "60");
+    fps_layout->setMargin(0);
+    fps_layout->setSpacing(0);
+
+    QString def_label = QString("QLabel{color:rgb(220,220,220); font-size:14px; border-radius:0px; background-color:rgba(0,0,0,128);}");
+    QLabel *label = new QLabel("帧率:");
+    label->setStyleSheet(def_label);
+    label->setAlignment(Qt::AlignHCenter|Qt::AlignVCenter);
+    btn_30fps = new ecolbtn(125, 30, "rgb(220,220,220)", "rgb(0,114,255)", "30");
+    btn_48fps = new ecolbtn(125, 30, "rgb(220,220,220)", "rgb(0,114,255)", "48");
+    btn_60fps = new ecolbtn(125, 30, "rgb(220,220,220)", "rgb(0,114,255)", "60");
 
     fps_layout->addWidget(label);
     fps_layout->addWidget(btn_30fps);
@@ -44,12 +52,15 @@ eDockerWidget::eDockerWidget(QWidget *parent) : QWidget(parent)
     main_layout->addLayout(fps_layout);
 
     QHBoxLayout *quality_layout = new QHBoxLayout;
-    QLabel *quality_label = new QLabel("质量");
+    quality_layout->setSpacing(0);
+    QLabel *quality_label = new QLabel("质量:");
+    quality_label->setAlignment(Qt::AlignHCenter|Qt::AlignVCenter);
+    quality_label->setStyleSheet(def_label);
     //流畅  标准 高清 蓝光
-    ecolbtn* btn_q1 = new ecolbtn(90, 30, "rgb(0,0,0)", "rgb(0,0,255)", "流畅");
-    ecolbtn* btn_q2 = new ecolbtn(90, 30, "rgb(0,0,0)", "rgb(0,0,255)", "标准");
-    ecolbtn* btn_q3 = new ecolbtn(90, 30, "rgb(0,0,0)", "rgb(0,0,255)", "高清");
-    ecolbtn* btn_q4 = new ecolbtn(90, 30, "rgb(0,0,0)", "rgb(0,0,255)", "蓝光");
+    btn_q1 = new ecolbtn(94, 30, "rgb(220,220,220)", "rgb(0,114,255)", "流畅");
+    btn_q2 = new ecolbtn(94, 30, "rgb(220,220,220)", "rgb(0,114,255)", "标准");
+    btn_q3 = new ecolbtn(94, 30, "rgb(220,220,220)", "rgb(0,114,255)", "高清");
+    btn_q4 = new ecolbtn(94, 30, "rgb(220,220,220)", "rgb(0,114,255)", "蓝光");
     quality_layout->addWidget(quality_label);
     quality_layout->addWidget(btn_q1);
     quality_layout->addWidget(btn_q2);
@@ -58,16 +69,18 @@ eDockerWidget::eDockerWidget(QWidget *parent) : QWidget(parent)
     main_layout->addLayout(quality_layout);
 
     QHBoxLayout *quit_layout = new QHBoxLayout;
-    QPushButton *btn_quit = new QPushButton("退出云主机");
+    //QPushButton *btn_quit = new QPushButton("退出云主机");
+    ecolbtn* btn_quit = new ecolbtn(420, 30, "rgb(220,220,220)", "rgb(0,114,255)", "退出云主机");
 
     quit_layout->addWidget(btn_quit);
     main_layout->addLayout(quit_layout);
 
 
     QHBoxLayout *mainbtn_layout = new QHBoxLayout;
-    eImageBtn* btn_return = new eImageBtn(60, 60, "btnimg/return.png", "");
-    eImageBtn* btn_home = new eImageBtn(60, 60, "btnimg/home.png", "");
-    eImageBtn* btn_switch = new eImageBtn(60, 60, "btnimg/switch.png", "");
+    mainbtn_layout->setSpacing(0);
+    eImageBtn* btn_return = new eImageBtn(60, 60, "btnimg/return.png", "", "", "", "");
+    eImageBtn* btn_home = new eImageBtn(60, 60, "btnimg/home.png", "", "", "", "");
+    eImageBtn* btn_switch = new eImageBtn(60, 60, "btnimg/switch.png", "", "", "", "");
     mainbtn_layout->addWidget(btn_return);
     mainbtn_layout->addWidget(btn_home);
     mainbtn_layout->addWidget(btn_switch);
@@ -94,8 +107,15 @@ eDockerWidget::eDockerWidget(QWidget *parent) : QWidget(parent)
     connect(btn_home, &QPushButton::clicked, this, &eDockerWidget::home_click);
     connect(btn_return, &QPushButton::clicked, this, &eDockerWidget::return_click);
     connect(btn_switch, &QPushButton::clicked, this, &eDockerWidget::Process_click);
+    connect(button1, &QPushButton::clicked, this, &eDockerWidget::Mobile_click);
+    connect(button2, &QPushButton::clicked, this, &eDockerWidget::Pad_click);
+    connect(button3, &QPushButton::clicked, this, &eDockerWidget::Tv_click);
+    connect(button4, &QPushButton::clicked, this, &eDockerWidget::Stb_click);
 
     setAttribute(Qt::WA_TranslucentBackground);
+
+    btn_30fps->SetState(ecolbtn::STATE::SEL);
+    btn_q1->SetState(ecolbtn::STATE::SEL);
 
 }
 
@@ -142,7 +162,7 @@ void eDockerWidget::HideWindow(){
     int offset_x = screenRect.width() / 2 - this->width() / 2;
     //this->setGeometry(offset_x, 0, width(), 20);
 
-    this->setFixedHeight(20);
+    this->setFixedHeight(5);
 
 }
 
@@ -171,7 +191,7 @@ void eDockerWidget::resizeEvent(QResizeEvent *event){
         _init_h = rc.height();
         QWidget* shadow = new QWidget(this);
         shadow->setGeometry(0, 0, this->width(), this->height());
-        QString style("QWidget{border-radius:0px; background-color:rgba(255,255,255,128);}");
+        QString style("QWidget{border-radius:0px; background-color:rgba(255,255,255,100);}");
         shadow->setStyleSheet(style);
         shadow->lower();
         ShowWindow();
@@ -195,30 +215,66 @@ void eDockerWidget::quit_clicked(bool checked){
 
 void eDockerWidget::fps_30_click(bool checked){
     emit fps_signal(30);
+    CustomToast::instance().show(CustomToast::INFO, "已切换30帧");
+    btn_30fps->SetState(ecolbtn::STATE::SEL);
+    btn_48fps->SetState(ecolbtn::STATE::DEF);
+    btn_60fps->SetState(ecolbtn::STATE::DEF);
 }
 
 void eDockerWidget::fps_48_click(bool checked){
     emit fps_signal(48);
+    CustomToast::instance().show(CustomToast::INFO, "已切换48帧");
+    btn_30fps->SetState(ecolbtn::STATE::DEF);
+    btn_48fps->SetState(ecolbtn::STATE::SEL);
+    btn_60fps->SetState(ecolbtn::STATE::DEF);
 }
 
 void eDockerWidget::fps_60_click(bool checked){
     emit fps_signal(60);
+    CustomToast::instance().show(CustomToast::INFO, "已切换60帧");
+    btn_30fps->SetState(ecolbtn::STATE::DEF);
+    btn_48fps->SetState(ecolbtn::STATE::DEF);
+    btn_60fps->SetState(ecolbtn::STATE::SEL);
 }
 
 void eDockerWidget::q1_click(bool checked){
     emit bitrate_signal(600);
+    QString msg = QString("已切换-%1").arg(btn_q1->text());
+    CustomToast::instance().show(CustomToast::INFO, msg);
+    btn_q1->SetState(ecolbtn::STATE::SEL);
+    btn_q2->SetState(ecolbtn::STATE::DEF);
+    btn_q3->SetState(ecolbtn::STATE::DEF);
+    btn_q4->SetState(ecolbtn::STATE::DEF);
 }
 
 void eDockerWidget::q2_click(bool checked){
     emit bitrate_signal(2000);
+    QString msg = QString("已切换-%1").arg(btn_q2->text());
+    CustomToast::instance().show(CustomToast::INFO, msg);
+    btn_q1->SetState(ecolbtn::STATE::DEF);
+    btn_q2->SetState(ecolbtn::STATE::SEL);
+    btn_q3->SetState(ecolbtn::STATE::DEF);
+    btn_q4->SetState(ecolbtn::STATE::DEF);
 }
 
 void eDockerWidget::q3_click(bool checked){
     emit bitrate_signal(4000);
+    QString msg = QString("已切换-%1").arg(btn_q3->text());
+    CustomToast::instance().show(CustomToast::INFO, msg);
+    btn_q1->SetState(ecolbtn::STATE::DEF);
+    btn_q2->SetState(ecolbtn::STATE::DEF);
+    btn_q3->SetState(ecolbtn::STATE::SEL);
+    btn_q4->SetState(ecolbtn::STATE::DEF);
 }
 
 void eDockerWidget::q4_click(bool checked){
     emit bitrate_signal(6000);
+    QString msg = QString("已切换-%1").arg(btn_q4->text());
+    CustomToast::instance().show(CustomToast::INFO, msg);
+    btn_q1->SetState(ecolbtn::STATE::DEF);
+    btn_q2->SetState(ecolbtn::STATE::DEF);
+    btn_q3->SetState(ecolbtn::STATE::DEF);
+    btn_q4->SetState(ecolbtn::STATE::SEL);
 }
 
 void eDockerWidget::home_click(bool checked){
@@ -231,4 +287,40 @@ void eDockerWidget::Process_click(bool checked){
 
 void eDockerWidget::return_click(bool checked){
     emit return_signal();
+}
+
+void eDockerWidget::Mobile_click(bool checked){
+    emit switch_dev_signal("phone");
+}
+
+void eDockerWidget::Pad_click(bool checked){
+    emit switch_dev_signal("pad");
+}
+
+void eDockerWidget::Tv_click(bool checked){
+    emit switch_dev_signal("tv");
+}
+
+void eDockerWidget::Stb_click(bool checked){
+    emit switch_dev_signal("box");
+}
+
+void eDockerWidget::Show_dev_slot(QString dev){
+    std::string strdev = dev.toStdString();
+    std::vector<std::string> devs = stringSplit(strdev, ',');
+    button1->Sel(false);
+    button2->Sel(false);
+    button3->Sel(false);
+    button4->Sel(false);
+    for(auto it : devs){
+        if(it.compare("phone") == 0){
+            button1->Sel(true);
+        }else if(it.compare("pad") == 0){
+            button2->Sel(true);
+        }else if(it.compare("tv") == 0){
+            button3->Sel(true);
+        }else if(it.compare("box") == 0){
+            button4->Sel(true);
+        }
+    }
 }

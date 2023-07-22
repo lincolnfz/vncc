@@ -1,6 +1,8 @@
 #ifndef EDOCKERWIDGET_H
 #define EDOCKERWIDGET_H
 #include <QDockWidget>
+#include <common/qt/eimagebtn.h>
+#include <common/qt/ecolbtn.h>
 
 class eDockerWidget : public QWidget
 {
@@ -31,6 +33,11 @@ public slots:
     void home_click(bool checked);
     void Process_click(bool checked);
     void return_click(bool checked);
+    void Mobile_click(bool checked);
+    void Pad_click(bool checked);
+    void Tv_click(bool checked);
+    void Stb_click(bool checked);
+    void Show_dev_slot(QString);
 
 protected:
     virtual void mouseMoveEvent(QMouseEvent *event) override;
@@ -47,7 +54,8 @@ private:
     int _init_w = 0;
     int _init_h = 0;
     int _timer_id = 0;
-
+    eImageBtn *button1, *button2, *button3, *button4;
+    ecolbtn *btn_30fps, *btn_48fps, *btn_60fps, *btn_q1, *btn_q2, *btn_q3, *btn_q4;
 };
 
 #endif // EDOCKERWIDGET_H
