@@ -5,7 +5,6 @@
 #include <base/base.h>
 #include <QMainWindow>
 #include <edockerwidget.h>
-#include <QOpenGLWidget>
 #include <rpc/server.h>
 #include <rpc/client.h>
 
