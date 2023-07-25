@@ -7,6 +7,7 @@ CONFIG += c++17
 INCLUDEPATH += $$PWD
 INCLUDEPATH += $$PWD/third_party/rpclib/include
 INCLUDEPATH += $$PWD/third_party/angle/include
+INCLUDEPATH += $$PWD/third_party/angle/include/angle
 INCLUDEPATH += $$PWD/base/include
 INCLUDEPATH += $$PWD/third_party/openssl/include
 INCLUDEPATH += $$PWD/third_party/curl/include

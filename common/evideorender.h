@@ -1,14 +1,14 @@
 #ifndef EVIDEORENDER_H
 #define EVIDEORENDER_H
 #include "base/base.h"
-#include <myangle/GLES3/gl32.h>
-#include <myangle/GLES2/gl2ext.h>
-#include <myangle/GLES3/gl3platform.h>
+#include <angle/GLES3/gl32.h>
+#include <angle/GLES2/gl2ext.h>
+#include <angle/GLES3/gl3platform.h>
 
-#include <myangle/EGL/egl.h>
-#include <myangle/EGL/eglext.h>
-#include <myangle/EGL/eglext_angle.h>
-#include <myangle/EGL/eglplatform.h>
+#include <angle/EGL/egl.h>
+#include <angle/EGL/eglext.h>
+#include <angle/EGL/eglext_angle.h>
+#include <angle/EGL/eglplatform.h>
 #include <base/event/pevents.h>
 
 class eVideoRender : public nbase::SupportWeakCallback
